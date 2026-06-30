@@ -6,11 +6,15 @@
   "description": "v0 efficiency-frontier audit harness: corpus -> stubbed-gateway panel run -> calibrated judge (ECE/Brier/reliability) -> Pass^k reliability -> Pareto frontier + equal-quality savings. Fixture-driven; never calls a real model/key/network.",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint ."
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "typescript-eslint": "^8.18.2"
   }
 }

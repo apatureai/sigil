@@ -1,20 +1,31 @@
-# assay-harness (v0)
+# assurance-harness
 
-The engine behind the **independent agent-efficiency & assurance audit** (engagement #1). Implements the open methodology (core #130): turn a frozen task corpus + the client's calibrated quality bar into an efficiency frontier with run-to-run reliability and a judge whose own error bars are disclosed.
+The engine behind an **independent, neutral AI quality & efficiency assurance audit** for regulated enterprises. It measures a client's OWN calibrated quality bar across model providers, finds where they overpay at equal quality, surfaces run-to-run reliability, and produces a finance/security-signable artifact — selling **no model, no router, no platform**.
 
-> **Codename only.** The practice name is unsettled (see core #126/#129 naming discussion). This package is intentionally **decoupled** — it implements ECE/Brier/Pass^k fresh rather than importing the product company's eval lib, to keep the neutrality posture.
+Implements the open methodology (apatureai/core #130). Decision of record: apatureai/core #134.
 
-## Hard rules (matched to the cluster)
-- **Never** calls a real model, key, sandbox, or network — the panel runs through an injected `Gateway`; tests inject `StubGateway` (fixtures only).
+> **Brand-neutral placeholder name.** The practice name is unratified; this repo is a private placeholder, easily renamed.
+
+## Why it's a *standalone* repo
+The moat is **structural neutrality** (#126/#134): in financial-services model risk, SR 11-7 requires independent model validation *separated from the builder*. If this engine lived inside a company that also sells models/routers, the artifact's independence would be contaminated. It stays standalone; it will reuse calibration IP by importing `@engine/eval` **one-directionally** (never the reverse).
+
+## Hard rules
+- **Never** calls a real model, key, sandbox, or network — the panel runs through an injected `Gateway`; tests use `StubGateway` (fixtures only).
 - No BYOK; in a real engagement the client supplies keys **in their own VPC**, and only scores/metrics leave.
-- Pure and deterministic: same corpus + frozen panel ⇒ same frontier.
+- Pure and deterministic: same frozen corpus + frozen panel ⇒ same frontier, byte-identical report.
 
-## Pipeline (`runAudit`)
-1. **Panel run** — each candidate model over each task, `trialsPerTask` times, via the gateway.
-2. **Calibrated judge** — score each output; calibration is measured against human-labeled `GroundTruth`.
-3. **Judge reliability** — ECE, Brier, and a reliability table (the differentiator: the quality number ships with its own error bars).
-4. **Pass^k** — unbiased run-to-run reliability per (model, task) — the "different output every run" axis.
-5. **Efficiency frontier** — per task family, the Pareto set over quality × cost × latency + the cheapest equal-quality switch and its `savingsPct`.
+## Components (methodology #130)
+| step | module | what it does |
+|------|--------|--------------|
+| 1–2 | `corpus` | frozen, **content-addressed** corpus: task families + the client rubric + human labels (ground truth + judge calibration anchors) |
+| 2 | `gateway` | injected panel runner port + `StubGateway` (no real model/key/network) |
+| 3 | `metrics` | **calibrated judge** reliability — ECE, Brier, reliability table (the number ships with its own error bars) |
+| 4 | `reliability` | **Pass^k** run-to-run variance (unbiased estimator) |
+| 5 | `frontier` | **Pareto** frontier over quality × cost × latency + equal-quality savings |
+| 6 | `governance` | read-only agent → task → identity least-privilege gap map (attach) |
+| 7 | `report` | the signable **report document** + deterministic markdown render |
+| 8 | `router-policy` | **neutral** router-policy export (cheapest-at-held-quality + fallbacks) the client keeps |
+| — | `harness` | `runAudit` wiring the pipeline |
 
 ## Status
-v0, local. Decision pending (founder): final **home** (a new standalone repo vs. a package reusing `@engine/eval` inside judgment-engine) and the **moat-vs-scale** call (this is the seed of either the audit tool or a monitoring SaaS — see core #131). Not yet pushed anywhere.
+v1 engine, green (typecheck · 29 tests · lint · CI). Vertical decided: **financial services**. Path decided: **boutique-first → productize the neutral measurement layer on a 3-part trigger** (#134). Next steps are external: secure the first FS/MRM design partner; ratify the brand; wire the real `@engine/eval` import when the harness graduates from fixtures.

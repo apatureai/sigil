@@ -31,3 +31,38 @@ export {
   type FamilyFrontier,
   type PassKRow,
 } from "./harness.js";
+
+export { canonicalize, contentHash } from "./canonical.js";
+
+export {
+  freezeCorpus,
+  panelCorpus,
+  groundTruthFrom,
+  type CorpusSpec,
+  type CorpusTask,
+  type FrozenCorpus,
+  type Rubric,
+  type LabeledExample,
+} from "./corpus.js";
+
+export {
+  buildReportDocument,
+  renderMarkdown,
+  type AuditReportDocument,
+  type ReportMeta,
+  type ReportFinding,
+} from "./report.js";
+
+export {
+  exportRouterPolicy,
+  type RouterPolicy,
+  type RoutePolicyEntry,
+} from "./router-policy.js";
+
+export {
+  mapGovernance,
+  type AgentRecord,
+  type TaskScopeRequirement,
+  type GovernanceFinding,
+  type GovernanceSeverity,
+} from "./governance.js";
