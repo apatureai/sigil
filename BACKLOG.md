@@ -15,7 +15,7 @@ Numbered backlog seeded as GitHub issues on this repo (mirrors the apatureai org
 - [ ] #11 — `@engine/eval` one-directional import to share calibration IP (replace the fresh impls)
 - [ ] #12 — CLI runner: `audit <corpus-dir>` → report + policy + governance map
 - [ ] #13 — Golden FS-shaped end-to-end fixture audit (deterministic regression)
-- [ ] #14 — Egress guard: allowlist/denylist enforcement + a test that raw outputs/prompts/keys never serialize into an exported artifact
+- [x] #14 — Egress guard: allowlist/denylist + fail-closed test that raw outputs/prompts/keys never serialize
 - [ ] #15 — Multi-judge ensemble + judge-disagreement disclosure
 - [ ] #16 — Trend/continuous mode scaffolding (the productization seam; gated on #134 trigger)
 - [ ] #17 — Signed report bundle + offline verification (air-gapped exchange)

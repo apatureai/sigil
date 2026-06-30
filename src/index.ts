@@ -66,3 +66,5 @@ export {
   type GovernanceFinding,
   type GovernanceSeverity,
 } from "./governance.js";
+
+export { assertSafeEgress, checkEgress, EgressViolation } from "./egress.js";
