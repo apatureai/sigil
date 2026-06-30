@@ -68,3 +68,13 @@ export {
 } from "./governance.js";
 
 export { assertSafeEgress, checkEgress, EgressViolation } from "./egress.js";
+
+export {
+  runBundleAudit,
+  loadBundle,
+  writeArtifacts,
+  main,
+  type AuditBundle,
+  type AuditConfig,
+  type AuditArtifacts,
+} from "./cli.js";

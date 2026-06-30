@@ -13,7 +13,7 @@ Numbered backlog seeded as GitHub issues on this repo (mirrors the apatureai org
 - [x] #9 — Governance overlay (read-only least-privilege gaps)
 - [ ] #10 — Production gateway adapter (LiteLLM/OpenRouter) behind the VPC egress allowlist
 - [ ] #11 — `@engine/eval` one-directional import to share calibration IP (replace the fresh impls)
-- [ ] #12 — CLI runner: `audit <corpus-dir>` → report + policy + governance map
+- [x] #12 — CLI runner: `audit <corpus-dir>` -> report + policy + governance (offline results-bundle)
 - [x] #13 — Golden FS-shaped end-to-end fixture audit (deterministic regression)
 - [x] #14 — Egress guard: allowlist/denylist + fail-closed test that raw outputs/prompts/keys never serialize
 - [ ] #15 — Multi-judge ensemble + judge-disagreement disclosure
