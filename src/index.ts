@@ -69,6 +69,8 @@ export {
 
 export { assertSafeEgress, checkEgress, EgressViolation } from "./egress.js";
 
+export { JudgeEnsemble, type NamedJudge, type DisagreementSummary } from "./ensemble.js";
+
 export {
   runBundleAudit,
   loadBundle,

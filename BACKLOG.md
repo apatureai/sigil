@@ -16,7 +16,7 @@ Numbered backlog seeded as GitHub issues on this repo (mirrors the apatureai org
 - [x] #12 — CLI runner: `audit <corpus-dir>` -> report + policy + governance (offline results-bundle)
 - [x] #13 — Golden FS-shaped end-to-end fixture audit (deterministic regression)
 - [x] #14 — Egress guard: allowlist/denylist + fail-closed test that raw outputs/prompts/keys never serialize
-- [ ] #15 — Multi-judge ensemble + judge-disagreement disclosure
+- [x] #15 — Multi-judge ensemble + judge-disagreement disclosure
 - [ ] #16 — Trend/continuous mode scaffolding (the productization seam; gated on #134 trigger)
 - [ ] #17 — Signed report bundle + offline verification (air-gapped exchange)
 
