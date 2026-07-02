@@ -26,6 +26,8 @@ The moat is **structural neutrality** (#126/#134): in financial-services model r
 | 7 | `report` | the signable **report document** + deterministic markdown render |
 | 8 | `router-policy` | **neutral** router-policy export (cheapest-at-held-quality + fallbacks) the client keeps |
 | — | `harness` | `runAudit` wiring the pipeline |
+| — | `conformal` | **finite-sample risk certificates**: exact Clopper–Pearson bounds + a certified abstention threshold (fixed-sequence Learn-Then-Test) — "on the cases the judge accepts, error ≤ α with confidence 1−δ; the rest go to humans" |
+| — | `stats` | evidence behind the headline claims: exact McNemar on paired outcomes gating "equal-quality switch", and a certified Pass^k lower bound |
 
 ## Status
-v1 engine, green (typecheck · 29 tests · lint · CI). Vertical decided: **financial services**. Path decided: **boutique-first → productize the neutral measurement layer on a 3-part trigger** (#134). Next steps are external: secure the first FS/MRM design partner; ratify the brand; wire the real `@engine/eval` import when the harness graduates from fixtures.
+v1 engine, green (typecheck · 71 tests · lint · CI). Vertical decided: **financial services**. Path decided: **boutique-first → productize the neutral measurement layer on a 3-part trigger** (#134). Next steps are external: secure the first FS/MRM design partner; ratify the brand; wire the real `@engine/eval` import when the harness graduates from fixtures.

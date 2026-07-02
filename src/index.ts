@@ -72,6 +72,24 @@ export { assertSafeEgress, checkEgress, EgressViolation } from "./egress.js";
 export { JudgeEnsemble, type NamedJudge, type DisagreementSummary } from "./ensemble.js";
 
 export {
+  clopperPearsonUpper,
+  clopperPearsonLower,
+  certifyAbstentionThreshold,
+  type AbstentionCertificate,
+  type AbstentionCertificateInput,
+} from "./conformal.js";
+
+export {
+  mcnemarExact,
+  verifySwitchQuality,
+  certifiedPassKLowerBound,
+  type McNemarResult,
+  type PairedOutcome,
+  type SwitchQualityEvidence,
+  type CertifiedPassK,
+} from "./stats.js";
+
+export {
   runBundleAudit,
   loadBundle,
   writeArtifacts,

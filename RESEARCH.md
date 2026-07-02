@@ -20,5 +20,9 @@
 - Moat = **structural neutrality**, which in FS is *legally load-bearing* (SR 26-2 separation), plus a **cross-client calibrated benchmark** that no conflicted vendor can assemble (scarce, labeled, practitioner-graded data).
 - **Open question / falsifier:** does calibration learned on client A transfer to client B (do practitioner rubrics rhyme within FS)? If yes → a compounding data moat and a productizable destination; if no → a profitable boutique with no product endpoint. Measured directly via the held-out ECE-transfer metric from engagement #2 (#134 T2). This single number decides venture-scale vs boutique.
 
+## Frontier techniques adopted (2026-07 audit)
+- **Distribution-free risk control:** the certificate layer (`conformal.ts`) is the deployable descendant of split conformal prediction and Learn-Then-Test risk control (Angelopoulos & Bates line) plus selective classification with a reject option (Geifman & El-Yaniv). Chosen over asymptotic/Gaussian intervals because examiners get exact finite-sample statements at audit sample sizes; over full conformal because split/LTT needs only the labeled corpus we already freeze.
+- **Honest caveat, disclosed in every statement:** validity assumes exchangeability between calibration and deployment draws; drift is exactly what the quarterly re-certification cadence measures. Small n ⇒ wide bounds ⇒ reported wide, never narrowed.
+
 ## Verdict
 Good. Demand is regulator-defined, recurring, and addresses a named fast-growing market where independence is the dominant share; neutrality is a defensible, regulation-backed moat. Boutique viability is high-confidence; the productized upside is conditional on the calibration-transfer falsifier. Enter financial services, one vertical, boutique-first.
