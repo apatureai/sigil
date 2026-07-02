@@ -18,10 +18,10 @@ Numbered backlog seeded as GitHub issues on this repo (mirrors the apatureai org
 - [x] #14 — Egress guard: allowlist/denylist + fail-closed test that raw outputs/prompts/keys never serialize
 - [x] #15 — Multi-judge ensemble + judge-disagreement disclosure
 - [ ] #16 — Trend/continuous mode scaffolding (the productization seam; gated on #134 trigger)
-- [ ] #17 — Signed report bundle + offline verification (air-gapped exchange)
+- [x] #17 — Signed report bundle + offline verification (`bundle.ts`: detached Ed25519 signature over {documentHash, markdownHash} behind injected signer/verifier ports; fail-closed named-reason verification)
 - [x] — Finite-sample risk certificates: exact Clopper–Pearson bounds + certified abstention threshold via fixed-sequence Learn-Then-Test (`conformal.ts`)
 - [x] — Claim evidence: exact McNemar gate on "equal-quality switch" + certified Pass^k lower bound (`stats.ts`)
-- [ ] — Wire certificates + switch evidence into the report document (§3.7) and the router-policy quality floor (§3.8), so every shipped artifact carries its guarantee inline
+- [x] — Wire certificates + switch evidence into the report document (§3.7: additive `abstention`/`switchEvidence`/`certifiedReliability` blocks + markdown sections) and the router policy (§3.8: quality-first ordering + annotation when the paired evidence refuses the cost-first switch)
 
 ## Practice graduation gates (#134 — do NOT productize until ALL fire)
 - [ ] T1 — ≥5 paid engagements incl. ≥2 periodic-assurance retainers

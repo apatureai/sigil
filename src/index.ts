@@ -51,13 +51,26 @@ export {
   type AuditReportDocument,
   type ReportMeta,
   type ReportFinding,
+  type ReportEvidence,
 } from "./report.js";
 
 export {
   exportRouterPolicy,
   type RouterPolicy,
   type RoutePolicyEntry,
+  type RouterPolicyOptions,
 } from "./router-policy.js";
+
+export {
+  signReportBundle,
+  verifyReportBundle,
+  ed25519Signer,
+  ed25519Verifier,
+  type BundleSigner,
+  type BundleVerifier,
+  type SignedReportBundle,
+  type BundleVerification,
+} from "./bundle.js";
 
 export {
   mapGovernance,

@@ -46,7 +46,10 @@
 ### 3.10 Risk certificates (`conformal.ts`)
 - ECE/Brier (§3.3) are diagnostics; certificates are guarantees. `clopperPearsonUpper/Lower` give exact one-sided binomial bounds on the judge's error rate over the labeled corpus. `certifyAbstentionThreshold` runs fixed-sequence Learn-Then-Test over a **data-independent** confidence grid and returns the maximal-coverage threshold whose selective error is ≤ α with confidence 1−δ — or an explicit refusal ("abstain or collect more labels"). Valid under exchangeability with the calibration draw; the quarterly retainer cadence is the re-certification cadence. Fail-closed: empty/insufficient calibration certifies nothing.
 
-### 3.11 Claim evidence (`stats.ts`)
+### 3.11 Signed bundle (`bundle.ts`)
+- Backlog #17 / deployment mode 3 (air-gapped exchange): `signReportBundle` produces a portable bundle carrying the document, its deterministic markdown, and a detached Ed25519 signature over the canonical `{documentHash, markdownHash}` payload; `verifyReportBundle` re-derives everything offline and fails closed with named reasons (document-hash mismatch, markdown tamper, payload swap, signature failure, unknown keyId). Signer/verifier are injected ports — the harness ships no key; Ed25519 keeps signatures deterministic (RFC 8032) so bundles stay byte-stable.
+
+### 3.12 Claim evidence (`stats.ts`)
 - `verifySwitchQuality` gates the §3.5 "equal-or-better quality" claim with an exact two-sided McNemar test on paired per-task outcomes; a significantly-worse candidate makes the switch claim NOT defensible, and "no detected loss" is reported as exactly that, never as equality. `certifiedPassKLowerBound` turns the §3.4 point estimate into a finite-sample floor (Clopper–Pearson lower bound on the per-run pass rate, powered to k, i.i.d.-runs assumption disclosed in the statement).
 
 ## 4. Security & data handling (TRD §; PRD §5)
