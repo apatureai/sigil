@@ -51,13 +51,51 @@ export {
   type AuditReportDocument,
   type ReportMeta,
   type ReportFinding,
+  type ReportEvidence,
 } from "./report.js";
 
 export {
   exportRouterPolicy,
   type RouterPolicy,
   type RoutePolicyEntry,
+  type RouterPolicyOptions,
 } from "./router-policy.js";
+
+export {
+  signReportBundle,
+  verifyReportBundle,
+  ed25519Signer,
+  ed25519Verifier,
+  type BundleSigner,
+  type BundleVerifier,
+  type SignedReportBundle,
+  type BundleVerification,
+} from "./bundle.js";
+
+export {
+  initAci,
+  intervalFor,
+  updateAci,
+  type AciOptions,
+  type AciInterval,
+  type AciState,
+  type AciUpdate,
+} from "./aci.js";
+
+export {
+  initEProcess,
+  updateEProcess,
+  initEDetector,
+  updateEDetector,
+  initCusum,
+  updateCusum,
+  errorObservations,
+  type DriftMonitorOptions,
+  type EProcessState,
+  type EDetectorState,
+  type CusumOptions,
+  type CusumState,
+} from "./drift.js";
 
 export {
   mapGovernance,
@@ -70,6 +108,24 @@ export {
 export { assertSafeEgress, checkEgress, EgressViolation } from "./egress.js";
 
 export { JudgeEnsemble, type NamedJudge, type DisagreementSummary } from "./ensemble.js";
+
+export {
+  clopperPearsonUpper,
+  clopperPearsonLower,
+  certifyAbstentionThreshold,
+  type AbstentionCertificate,
+  type AbstentionCertificateInput,
+} from "./conformal.js";
+
+export {
+  mcnemarExact,
+  verifySwitchQuality,
+  certifiedPassKLowerBound,
+  type McNemarResult,
+  type PairedOutcome,
+  type SwitchQualityEvidence,
+  type CertifiedPassK,
+} from "./stats.js";
 
 export {
   runBundleAudit,

@@ -43,6 +43,18 @@
 ### 3.9 Orchestration (`harness.ts`)
 - `runAudit(input) → AuditReport { judgeReliability, families[], passK[] }`. Pure over injected ports.
 
+### 3.10 Risk certificates (`conformal.ts`)
+- ECE/Brier (§3.3) are diagnostics; certificates are guarantees. `clopperPearsonUpper/Lower` give exact one-sided binomial bounds on the judge's error rate over the labeled corpus. `certifyAbstentionThreshold` runs fixed-sequence Learn-Then-Test over a **data-independent** confidence grid and returns the maximal-coverage threshold whose selective error is ≤ α with confidence 1−δ — or an explicit refusal ("abstain or collect more labels"). Valid under exchangeability with the calibration draw; the quarterly retainer cadence is the re-certification cadence. Fail-closed: empty/insufficient calibration certifies nothing.
+
+### 3.11 Signed bundle (`bundle.ts`)
+- Backlog #17 / deployment mode 3 (air-gapped exchange): `signReportBundle` produces a portable bundle carrying the document, its deterministic markdown, and a detached Ed25519 signature over the canonical `{documentHash, markdownHash}` payload; `verifyReportBundle` re-derives everything offline and fails closed with named reasons (document-hash mismatch, markdown tamper, payload swap, signature failure, unknown keyId). Signer/verifier are injected ports — the harness ships no key; Ed25519 keeps signatures deterministic (RFC 8032) so bundles stay byte-stable.
+
+### 3.12 Ongoing monitoring (`drift.ts`)
+- Sequential drift monitors over bounded [0,1] observation streams (judge error indicators via `errorObservations`), built on betting supermartingales (e-detector line, arXiv 2203.03532). Two constructions with EXACTLY-stated guarantees: the fixed-null `EProcess` (Ville — under H0 "true rate ≤ μ0" the probability of EVER alarming is ≤ α over the unbounded horizon) and the changepoint `EDetector` (e-CUSUM — average run length to false alarm ≥ 1/α, retaining sensitivity to late changes). λ-grid mixtures replace tuning; state is plain serializable data so a monitoring run is persistable and independently replayable; classical Page CUSUM ships as the disclosed weaker baseline. This is the quarterly retainer's machinery: the same labeled streams the certificates (§3.10) consume, monitored BETWEEN audits with a false-alarm budget an examiner can hold.
+
+### 3.13 Claim evidence (`stats.ts`)
+- `verifySwitchQuality` gates the §3.5 "equal-or-better quality" claim with an exact two-sided McNemar test on paired per-task outcomes; a significantly-worse candidate makes the switch claim NOT defensible, and "no detected loss" is reported as exactly that, never as equality. `certifiedPassKLowerBound` turns the §3.4 point estimate into a finite-sample floor (Clopper–Pearson lower bound on the per-run pass rate, powered to k, i.i.d.-runs assumption disclosed in the statement).
+
 ## 4. Security & data handling (TRD §; PRD §5)
 - Deployment modes: hosted (non-regulated), **customer-VPC** (default for FS), air-gapped signed-bundle exchange (deferred).
 - Egress allowlist: scores, calibration metrics, frontier, report, router policy. **Denylist:** raw outputs, prompts, keys, corpus content beyond hashes.
@@ -55,6 +67,8 @@
 - Incomplete labels → calibration over labeled subset only; report discloses sample size.
 - Nothing clears the quality floor → router policy falls back to highest-quality candidate (never drops a family); report flags it.
 - Judge poorly calibrated (high ECE) → surfaced, not hidden; the audit reports its own measurement reliability before any savings claim.
+- No abstention threshold certifies the target risk → the certificate says so explicitly ("abstain or collect more labels"); a wide bound from small n is a finding, never rounded away.
+- Candidate significantly worse on paired tasks → the switch recommendation is reported NOT defensible regardless of the cost delta.
 
 ## 7. Eval / graduation
 Offline harness over golden FS-shaped fixtures must show: deterministic byte-stable output; calibration metrics correct on known sets; Pass^k matching the combinatorial truth; frontier dominance correct. Practice-level graduation gates are the #134 triggers (T1–T3), tracked in BACKLOG.md.
