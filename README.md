@@ -32,4 +32,4 @@ The moat is **structural neutrality** (#126/#134): in financial-services model r
 | — | `drift` | **anytime-valid ongoing monitoring**: e-process (Ville: P(ever false-alarm) ≤ α) + changepoint e-detector (ARL ≥ 1/α) over bounded judge-error streams, with classical CUSUM as the disclosed weaker baseline — the SR 26-2 "ongoing monitoring" companion to the static certificates |
 
 ## Status
-v1 engine, green (typecheck · 95 tests · lint · CI). Vertical decided: **financial services**. Path decided: **boutique-first → productize the neutral measurement layer on a 3-part trigger** (#134). Next steps are external: secure the first FS/MRM design partner; ratify the brand; wire the real `@engine/eval` import when the harness graduates from fixtures.
+v1 engine, green (typecheck · 108 tests · lint · CI). Vertical decided: **financial services**. Path decided: **boutique-first → productize the neutral measurement layer on a 3-part trigger** (#134). Next steps are external: secure the first FS/MRM design partner; ratify the brand; wire the real `@engine/eval` import when the harness graduates from fixtures.

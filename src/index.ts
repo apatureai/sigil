@@ -73,6 +73,16 @@ export {
 } from "./bundle.js";
 
 export {
+  initAci,
+  intervalFor,
+  updateAci,
+  type AciOptions,
+  type AciInterval,
+  type AciState,
+  type AciUpdate,
+} from "./aci.js";
+
+export {
   initEProcess,
   updateEProcess,
   initEDetector,
