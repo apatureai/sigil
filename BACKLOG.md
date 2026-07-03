@@ -22,6 +22,10 @@ Numbered backlog seeded as GitHub issues on this repo (mirrors the apatureai org
 - [x] — Finite-sample risk certificates: exact Clopper–Pearson bounds + certified abstention threshold via fixed-sequence Learn-Then-Test (`conformal.ts`)
 - [x] — Claim evidence: exact McNemar gate on "equal-quality switch" + certified Pass^k lower bound (`stats.ts`)
 - [x] — Wire certificates + switch evidence into the report document (§3.7: additive `abstention`/`switchEvidence`/`certifiedReliability` blocks + markdown sections) and the router policy (§3.8: quality-first ordering + annotation when the paired evidence refuses the cost-first switch)
+- [x] — Anytime-valid ongoing monitoring (`drift.ts`): betting e-process (Ville false-alarm bound) + changepoint e-detector (ARL bound) + CUSUM baseline over bounded judge-error streams (SOTA dossier lane 1 flagship)
+- [ ] — Cross-validate drift.ts against CRAN `stcpR6` outputs as golden fixtures (NEEDS-VERIFICATION follow-up)
+- [ ] — Anchor-set drift attribution protocol (system-vs-judge, per arXiv 2606.15474) on top of drift.ts; rotate-with-overlap anchor refresh policy
+- [ ] — `aci.ts`: adaptive conformal intervals (ACI/PID) for trend bands (SOTA dossier lane 1)
 
 ## Practice graduation gates (#134 — do NOT productize until ALL fire)
 - [ ] T1 — ≥5 paid engagements incl. ≥2 periodic-assurance retainers

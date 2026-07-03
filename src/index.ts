@@ -73,6 +73,21 @@ export {
 } from "./bundle.js";
 
 export {
+  initEProcess,
+  updateEProcess,
+  initEDetector,
+  updateEDetector,
+  initCusum,
+  updateCusum,
+  errorObservations,
+  type DriftMonitorOptions,
+  type EProcessState,
+  type EDetectorState,
+  type CusumOptions,
+  type CusumState,
+} from "./drift.js";
+
+export {
   mapGovernance,
   type AgentRecord,
   type TaskScopeRequirement,

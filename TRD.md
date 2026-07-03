@@ -49,7 +49,10 @@
 ### 3.11 Signed bundle (`bundle.ts`)
 - Backlog #17 / deployment mode 3 (air-gapped exchange): `signReportBundle` produces a portable bundle carrying the document, its deterministic markdown, and a detached Ed25519 signature over the canonical `{documentHash, markdownHash}` payload; `verifyReportBundle` re-derives everything offline and fails closed with named reasons (document-hash mismatch, markdown tamper, payload swap, signature failure, unknown keyId). Signer/verifier are injected ports — the harness ships no key; Ed25519 keeps signatures deterministic (RFC 8032) so bundles stay byte-stable.
 
-### 3.12 Claim evidence (`stats.ts`)
+### 3.12 Ongoing monitoring (`drift.ts`)
+- Sequential drift monitors over bounded [0,1] observation streams (judge error indicators via `errorObservations`), built on betting supermartingales (e-detector line, arXiv 2203.03532). Two constructions with EXACTLY-stated guarantees: the fixed-null `EProcess` (Ville — under H0 "true rate ≤ μ0" the probability of EVER alarming is ≤ α over the unbounded horizon) and the changepoint `EDetector` (e-CUSUM — average run length to false alarm ≥ 1/α, retaining sensitivity to late changes). λ-grid mixtures replace tuning; state is plain serializable data so a monitoring run is persistable and independently replayable; classical Page CUSUM ships as the disclosed weaker baseline. This is the quarterly retainer's machinery: the same labeled streams the certificates (§3.10) consume, monitored BETWEEN audits with a false-alarm budget an examiner can hold.
+
+### 3.13 Claim evidence (`stats.ts`)
 - `verifySwitchQuality` gates the §3.5 "equal-or-better quality" claim with an exact two-sided McNemar test on paired per-task outcomes; a significantly-worse candidate makes the switch claim NOT defensible, and "no detected loss" is reported as exactly that, never as equality. `certifiedPassKLowerBound` turns the §3.4 point estimate into a finite-sample floor (Clopper–Pearson lower bound on the per-run pass rate, powered to k, i.i.d.-runs assumption disclosed in the statement).
 
 ## 4. Security & data handling (TRD §; PRD §5)
