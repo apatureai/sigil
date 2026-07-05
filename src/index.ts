@@ -11,6 +11,18 @@ export {
 export { passAtK, type PassKResult } from "./reliability.js";
 
 export {
+  kendallTauB,
+  cardinalIntervalWidth,
+  rankScoreDecoupling,
+  type ScoredObservation,
+  type CardinalInterval,
+  type CardinalIntervalOptions,
+  type RankScoreDecoupling,
+  type RankScoreOptions,
+  type RankScoreVerdict,
+} from "./rank-score.js";
+
+export {
   paretoFrontier,
   recommendSwitch,
   type Candidate,
