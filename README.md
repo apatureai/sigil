@@ -1,10 +1,12 @@
-# assurance-harness
+# Sigil
 
 The engine behind an **independent, neutral AI quality & efficiency assurance audit** for regulated enterprises. It measures a client's OWN calibrated quality bar across model providers, finds where they overpay at equal quality, surfaces run-to-run reliability, and produces a finance/security-signable artifact — selling **no model, no router, no platform**.
 
 Implements the open methodology (apatureai/core #130). Decision of record: apatureai/core #134.
 
-> **Brand-neutral placeholder name.** The practice name is unratified; this repo is a private placeholder, easily renamed.
+> **Name.** This product is **Sigil** — a *sigil* is a seal/mark of authority, which is exactly what
+> the audit produces: a signed, sealed, independently-verifiable assurance artifact. (Formerly the
+> `assurance-harness` repo / `assay-harness` package / codename "Hexagonal".) Decision of record: apatureai/core (naming).
 
 ## Why it's a *standalone* repo
 The moat is **structural neutrality** (#126/#134): in financial-services model risk, SR 11-7 requires independent model validation *separated from the builder*. If this engine lived inside a company that also sells models/routers, the artifact's independence would be contaminated. It stays standalone; it will reuse calibration IP by importing `@engine/eval` **one-directionally** (never the reverse).
