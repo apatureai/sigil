@@ -30,6 +30,7 @@ export {
 } from "./frontier.js";
 
 export { StubGateway, type Gateway, type GatewayRequest, type GatewayResponse, type StubModelFixture } from "./gateway.js";
+export { createOpenAiCompatGateway, GatewayError, type OpenAiCompatGatewayOptions } from "./gateway-openai-compat.js";
 
 export {
   runAudit,
