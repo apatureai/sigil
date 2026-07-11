@@ -35,20 +35,43 @@ function clamp01(n: number): number {
   return Math.max(0, Math.min(1, n));
 }
 
-/** Partition predictions into `bins` equal-width confidence buckets. */
+/**
+ * Partition predictions into `bins` equal-width confidence buckets.
+ *
+ * Bin assignment is `floor(confidence / width)` (last bin inclusive of 1) —
+ * deliberately IDENTICAL to @engine/eval's canonical convention, including
+ * its floating-point behavior at bin edges, so the two repos' calibration
+ * numbers can never disagree (sigil#2; pinned by the cross-repo golden in
+ * `fixtures/calibration-contract.golden.json`). Do not "fix" the edge
+ * arithmetic here without changing it upstream first: agreement with the
+ * canonical implementation is the requirement, and the contract test breaks
+ * on any unilateral change.
+ */
 export function reliabilityTable(predictions: readonly JudgePrediction[], bins = 10): ReliabilityBin[] {
+  const width = 1 / bins;
+  const sumConf = Array<number>(bins).fill(0);
+  const sumCorrect = Array<number>(bins).fill(0);
+  const count = Array<number>(bins).fill(0);
+
+  for (const p of predictions) {
+    const c = clamp01(p.confidence);
+    let b = Math.floor(c / width);
+    if (b >= bins) b = bins - 1; // confidence === 1
+    sumConf[b] = (sumConf[b] ?? 0) + c;
+    sumCorrect[b] = (sumCorrect[b] ?? 0) + (p.correct ? 1 : 0);
+    count[b] = (count[b] ?? 0) + 1;
+  }
+
   const out: ReliabilityBin[] = [];
   for (let i = 0; i < bins; i++) {
-    const lower = i / bins;
-    const upper = (i + 1) / bins;
-    const inBin = predictions.filter((p) => {
-      const c = clamp01(p.confidence);
-      return i === bins - 1 ? c >= lower && c <= upper : c >= lower && c < upper;
+    const n = count[i] ?? 0;
+    out.push({
+      lower: i * width,
+      upper: (i + 1) * width,
+      count: n,
+      predicted: n === 0 ? 0 : (sumConf[i] ?? 0) / n,
+      empirical: n === 0 ? 0 : (sumCorrect[i] ?? 0) / n,
     });
-    const count = inBin.length;
-    const predicted = count === 0 ? 0 : inBin.reduce((s, p) => s + clamp01(p.confidence), 0) / count;
-    const empirical = count === 0 ? 0 : inBin.filter((p) => p.correct).length / count;
-    out.push({ lower, upper, count, predicted, empirical });
   }
   return out;
 }
