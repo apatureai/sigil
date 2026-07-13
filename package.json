@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "v0 efficiency-frontier audit harness: corpus -> stubbed-gateway panel run -> calibrated judge (ECE/Brier/reliability) -> Pass^k reliability -> Pareto frontier + equal-quality savings. Fixture-driven; never calls a real model/key/network.",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
