@@ -1,5 +1,5 @@
 /**
- * Production Gateway adapter (#1; TRD §4; methodology #130 step 2).
+ * Production Gateway adapter (TRD §4; methodology: TRD §2, step 2).
  *
  * Runs the candidate panel through an OpenAI-compatible chat-completions
  * endpoint — LiteLLM proxy and OpenRouter both speak this dialect — INSIDE the

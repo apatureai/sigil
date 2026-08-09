@@ -1,13 +1,14 @@
 /**
- * Router-policy exporter (methodology #130, step 8) — the "we configure the best
- * router" deliverable, kept vendor-NEUTRAL.
+ * Router-policy exporter (methodology: TRD §2, step 8) — a portable routing
+ * policy export, kept vendor-NEUTRAL.
  *
  * Translates the measured efficiency frontier into a portable routing policy the
  * client keeps and loads into whatever router they run (LiteLLM / OpenRouter /
  * NotDiamond). We export the policy; we are not the router and take no stake in
  * which model wins — the policy simply encodes "per task family, the cheapest
  * model that held the measured quality bar, with the frontier as fallbacks."
- * This is exactly the neutral measurement layer, not a fix we profit from.
+ * The policy is exported for the operator to load into whatever router they
+ * run; this module never routes traffic itself.
  */
 
 import type { AuditReport } from "./harness.js";

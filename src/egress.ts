@@ -1,5 +1,5 @@
 /**
- * Egress guard (TRD §4; PRD §5) — the boundary that makes "your data never
+ * Egress guard (TRD §4) — the boundary that makes "your data never
  * leaves" enforceable, not just a promise.
  *
  * Every artifact that crosses out of the client VPC (report document, router

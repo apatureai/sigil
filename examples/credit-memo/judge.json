@@ -1,0 +1,10 @@
+{
+  "Adequate coverage; approval reasonable with covenants.": {
+    "pass": true,
+    "confidence": 0.9
+  },
+  "idk approve i guess": {
+    "pass": false,
+    "confidence": 0.9
+  }
+}

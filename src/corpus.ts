@@ -1,11 +1,11 @@
 /**
- * Corpus + rubric (methodology #130, steps 1–2).
+ * Corpus + rubric (methodology: TRD §2, steps 1–2).
  *
  * An audit measures the client's OWN quality bar, so the corpus is a
  * first-class, frozen, content-addressed artifact: the task families, the
  * client's practitioner-defined rubric, and the human-confirmed labels that both
  * define ground truth and calibrate the judge. Freezing (content-addressing)
- * makes the whole audit reproducible (#130 "frozen corpus + frozen panel").
+ * makes the whole audit reproducible (TRD §2, "frozen corpus + frozen panel").
  */
 
 import { contentHash } from "./canonical.js";

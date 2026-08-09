@@ -1,3 +1,14 @@
 node_modules/
 dist/
 *.tsbuildinfo
+coverage/
+.vitest/
+.eslintcache
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+.DS_Store
+.idea/
+.vscode/

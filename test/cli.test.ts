@@ -39,7 +39,7 @@ describe("runBundleAudit (CLI core)", () => {
   });
 
   it("round-trips through load/write on disk (offline, no model)", async () => {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "assay-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "sigil-"));
     const b = bundle();
     fs.writeFileSync(path.join(dir, "config.json"), JSON.stringify(b.config));
     fs.writeFileSync(path.join(dir, "corpus.json"), JSON.stringify(b.corpus));

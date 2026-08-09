@@ -1,5 +1,5 @@
 /**
- * Run-to-run reliability — Pass^k (methodology #130, the "fear wedge").
+ * Run-to-run reliability — Pass^k (methodology: TRD §2, step 4).
  *
  * Point-estimate evals hide the "different output every run" risk. Given a
  * model's per-run pass/fail over the same task, Pass^k is the probability that k

@@ -1,7 +1,7 @@
 /**
  * Anytime-valid drift monitoring — e-processes and e-detectors for bounded
- * metrics (the SR 26-2 "ongoing monitoring" machinery; RESEARCH-SOTA dossier
- * lane 1, flagship LAND).
+ * metrics (the SR 26-2 "ongoing monitoring" companion to the static
+ * certificates in conformal.ts).
  *
  * The construction is the betting supermartingale for bounded observations
  * (Shin–Ramdas–Rinaldo e-detectors, arXiv 2203.03532; Waudby-Smith–Ramdas

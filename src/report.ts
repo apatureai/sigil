@@ -1,5 +1,5 @@
 /**
- * Report generator (methodology #130, step 7) — the finance/security-signable
+ * Report generator (methodology: TRD §2, step 7) — the finance/security-signable
  * deliverable.
  *
  * Turns an `AuditReport` into a deterministic, structured document plus a
@@ -94,7 +94,7 @@ export function buildReportDocument(
     family: f.family,
     recommendedFromTo: f.recommendation ? { from: f.recommendation.fromId, to: f.recommendation.toId } : null,
     savingsPct: round(f.recommendation?.savingsPct ?? 0),
-    // Equal-or-better quality is the only saving we claim (#130 step 5).
+    // Equal-or-better quality is the only saving claimed (TRD §3.5).
     qualityHeld: (f.recommendation?.qualityDelta ?? 0) >= 0,
   }));
 

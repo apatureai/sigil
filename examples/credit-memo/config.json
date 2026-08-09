@@ -1,0 +1,13 @@
+{
+  "client": "Example Bank",
+  "models": [
+    "frontier",
+    "budget",
+    "thrifty"
+  ],
+  "trialsPerTask": 4,
+  "passK": 3,
+  "currentModel": "frontier",
+  "qualityFloor": 0.9,
+  "generatedAt": "2026-06-30T00:00:00.000Z"
+}

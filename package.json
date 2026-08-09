@@ -1,16 +1,35 @@
 {
   "name": "sigil",
   "version": "0.0.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "v0 efficiency-frontier audit harness: corpus -> stubbed-gateway panel run -> calibrated judge (ECE/Brier/reliability) -> Pass^k reliability -> Pareto frontier + equal-quality savings. Fixture-driven; never calls a real model/key/network.",
+  "description": "Neutral AI quality & efficiency audit harness: frozen corpus -> captured panel run -> calibrated-judge metrics (ECE/Brier/reliability) -> Pass^k reliability -> Pareto cost-at-equal-quality frontier, with finite-sample risk certificates, anytime-valid drift monitoring, and signed reproducible reports. Fixture-driven; never calls a real model/key/network.",
+  "author": "Aditya Prathapa",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apatureai/sigil.git"
+  },
+  "homepage": "https://github.com/apatureai/sigil#readme",
+  "bugs": {
+    "url": "https://github.com/apatureai/sigil/issues"
+  },
+  "keywords": [
+    "llm-as-judge",
+    "calibration",
+    "conformal-prediction",
+    "e-process",
+    "model-risk",
+    "eval"
+  ],
   "engines": {
     "node": ">=24 <25"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "tsc -p tsconfig.build.json"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -24,6 +43,9 @@
   "pnpm": {
     "overrides": {
       "vite": "6.4.3"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

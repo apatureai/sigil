@@ -1,0 +1,22 @@
+{
+  "agents": [
+    {
+      "agentId": "credit-bot",
+      "grantedScopes": [
+        "read:applications",
+        "read:ssn"
+      ],
+      "tasks": [
+        "credit_memo"
+      ]
+    }
+  ],
+  "requirements": [
+    {
+      "family": "credit_memo",
+      "requiredScopes": [
+        "read:applications"
+      ]
+    }
+  ]
+}

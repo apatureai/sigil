@@ -1,0 +1,27 @@
+{
+  "rubric": {
+    "id": "fs-credit-qa",
+    "version": "1",
+    "criteria": [
+      "accurate",
+      "policy-compliant"
+    ]
+  },
+  "tasks": [
+    {
+      "taskId": "memo-1",
+      "family": "credit_memo",
+      "input": "Summarize creditworthiness for applicant 4821",
+      "labels": [
+        {
+          "output": "Adequate coverage; approval reasonable with covenants.",
+          "accept": true
+        },
+        {
+          "output": "idk approve i guess",
+          "accept": false
+        }
+      ]
+    }
+  ]
+}

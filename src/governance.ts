@@ -1,5 +1,5 @@
 /**
- * Governance overlay (methodology #130, step 6) — read-only attach, never the pitch.
+ * Governance overlay (methodology: TRD §2, step 6) — read-only attach.
  *
  * Maps agents -> the tasks they run -> the identity/scopes they hold, and flags
  * least-privilege gaps against what each task actually requires. Read-only: it

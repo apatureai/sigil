@@ -1,5 +1,5 @@
 /**
- * Efficiency frontier — the dollar finding (methodology #130, step 5).
+ * Efficiency frontier (methodology: TRD §2, step 5).
  *
  * Per task family, the Pareto-optimal set over quality (higher better), cost and
  * latency (lower better), plus the equal-or-better-quality switch that saves the

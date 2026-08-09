@@ -1,7 +1,6 @@
 /**
- * Adaptive conformal intervals for trend forecasts (RESEARCH-SOTA dossier
- * queue #2; Gibbs–Candès "Adaptive Conformal Inference Under Distribution
- * Shift", NeurIPS 2021).
+ * Adaptive conformal intervals for trend forecasts (Gibbs–Candès, "Adaptive
+ * Conformal Inference Under Distribution Shift", NeurIPS 2021).
  *
  * Extends the harness's distribution-free guarantee story from static gates
  * (conformal.ts) and sequential alarms (drift.ts) to FORECAST INTERVALS on

@@ -1,0 +1,38 @@
+{
+  "frontier": {
+    "costUsd": 0.03,
+    "latencyMs": 1400,
+    "outputs": {
+      "memo-1": [
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants."
+      ]
+    }
+  },
+  "budget": {
+    "costUsd": 0.003,
+    "latencyMs": 400,
+    "outputs": {
+      "memo-1": [
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants.",
+        "idk approve i guess",
+        "Adequate coverage; approval reasonable with covenants."
+      ]
+    }
+  },
+  "thrifty": {
+    "costUsd": 0.001,
+    "latencyMs": 300,
+    "outputs": {
+      "memo-1": [
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants.",
+        "Adequate coverage; approval reasonable with covenants."
+      ]
+    }
+  }
+}

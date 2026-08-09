@@ -27,7 +27,7 @@
  * Honest scope, disclosed rather than hidden:
  *  - Validity assumes the labeled calibration cases and deployment cases are
  *    exchangeable draws from the same task distribution. Drift breaks that —
- *    which is exactly why the engagement cadence is quarterly re-certification,
+ *    which is exactly why re-certification is expected on a recurring cadence,
  *    never a one-shot certificate.
  *  - Small n gives wide (honest) bounds. The bound is reported with its sample
  *    size; a wide bound is a finding, not a failure.

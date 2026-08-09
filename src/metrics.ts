@@ -1,5 +1,5 @@
 /**
- * Calibrated-judge metrics — the differentiator (methodology core #130).
+ * Calibrated-judge metrics (methodology: TRD §2, step 3).
  *
  * The audit's quality number ships WITH its own reliability. Given the judge's
  * confidence on each scored output and whether that judgment was actually
@@ -39,9 +39,9 @@ function clamp01(n: number): number {
  * Partition predictions into `bins` equal-width confidence buckets.
  *
  * Bin assignment is `floor(confidence / width)` (last bin inclusive of 1) —
- * deliberately IDENTICAL to @engine/eval's canonical convention, including
+ * deliberately IDENTICAL to the canonical upstream convention, including
  * its floating-point behavior at bin edges, so the two repos' calibration
- * numbers can never disagree (sigil#2; pinned by the cross-repo golden in
+ * numbers can never disagree (pinned by the golden fixture in
  * `fixtures/calibration-contract.golden.json`). Do not "fix" the edge
  * arithmetic here without changing it upstream first: agreement with the
  * canonical implementation is the requirement, and the contract test breaks

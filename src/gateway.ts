@@ -1,5 +1,5 @@
 /**
- * Gateway port (methodology #130, step 2).
+ * Gateway port (methodology: TRD §2, step 2).
  *
  * The harness runs the candidate panel through an injected `Gateway`. Production
  * wires this to LiteLLM/OpenRouter inside the CLIENT'S environment with the
