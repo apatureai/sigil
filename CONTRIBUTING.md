@@ -53,6 +53,5 @@ Sigil is **offline and deterministic by construction**, and the tests enforce it
 - Artifacts that leave the client boundary carry derived facts only; `assertSafeEgress`
   fails closed. Do not widen what crosses that line.
 
-Orientation for the module layout is in `ARCHITECTURE.md`; `README.md` has the module table
-and a runnable example; `TRD.md` is the per-module contract, including its stated failure
-modes.
+`README.md` is the documentation: it carries the module table, the pipeline sketch, the input
+bundle contract, a runnable quickstart and library example, and the stated failure modes.
