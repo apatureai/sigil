@@ -1,8 +1,7 @@
 {
-  "name": "sigil",
-  "version": "0.0.0",
+  "name": "@apatureai/sigil",
+  "version": "0.1.0",
   "license": "MIT",
-  "private": true,
   "type": "module",
   "description": "Error bars for LLM-as-judge evals: calibration (ECE/Brier/reliability), finite-sample risk certificates (Clopper-Pearson, Learn-Then-Test), Pass^k reliability, anytime-valid drift monitoring, and a cost-at-equal-quality frontier gated by an exact McNemar test. Dependency-free TypeScript; the analysis path calls no model, holds no key, and opens no socket.",
   "author": "Aditya Prathapa",
@@ -25,11 +24,34 @@
   "engines": {
     "node": ">=24"
   },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "sigil": "./dist/bin.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "examples/",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint .",
-    "build": "tsc -p tsconfig.build.json"
+    "build": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

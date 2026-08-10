@@ -1,5 +1,7 @@
 # Sigil
 
+[![CI](https://img.shields.io/github/actions/workflow/status/apatureai/sigil/ci.yml?branch=main&label=CI)](https://github.com/apatureai/sigil/actions/workflows/ci.yml) [![license](https://img.shields.io/github/license/apatureai/sigil?color=blue)](https://github.com/apatureai/sigil/blob/main/LICENSE) [![node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](#requirements)
+
 **Error bars for LLM-as-judge evals: calibration, finite-sample risk certificates, and anytime-valid drift monitoring, in dependency-free TypeScript.**
 
 If you use a model to grade another model's output, you have a ruler you have never measured.
@@ -151,7 +153,7 @@ Done in 804ms using pnpm v10.34.3
 
 $ pnpm build
 
-> sigil@0.0.0 build /path/to/sigil
+> @apatureai/sigil@0.1.0 build /path/to/sigil
 > tsc -p tsconfig.build.json
 
 ```
@@ -533,9 +535,13 @@ is open.
 the system got worse or the judge did. The design sketch is a held-out anchor set with a
 rotate-with-overlap refresh policy, sitting on top of `drift.ts`. Nothing is implemented.
 
-**npm publication.** The package is `private: true` with no `bin` field, so there is no
-`npm i sigil` and no installable command. Publishing needs a name decision, a `bin` entry, and a
-release workflow.
+**npm publication.** Nothing is on npm yet, so `npm i @apatureai/sigil` does not work today. The
+packaging is done and verified: the manifest is no longer `private`, it declares `bin`, `files`,
+`exports`, `engines` and a `prepublishOnly` build, and the packed tarball has been installed from
+disk and its `sigil` command run end to end against the shipped example bundle. What is left is the
+publish itself and a release workflow to automate it. The unscoped name `sigil` was taken (the
+registry holds a tombstoned entry from a 2013 package unpublished in October 2024), so the package
+name is the scoped `@apatureai/sigil`.
 
 ### Out of scope on purpose
 
