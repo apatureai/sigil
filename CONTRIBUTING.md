@@ -13,7 +13,8 @@ If you do open a PR anyway: keep it small, explain what breaks without it, and m
 
 ## Building it locally
 
-Requires **Node 24** (`.node-version`; `package.json` pins `engines.node` to `>=24 <25`) and
+Requires **Node 24 or newer** (`.node-version` pins 24, which is what CI and every verification
+run used; `package.json` sets `engines.node` to `>=24`) and
 **pnpm** (the repo ships a `pnpm-lock.yaml`; CI uses pnpm 9, and pnpm 10 works).
 
 ```sh
