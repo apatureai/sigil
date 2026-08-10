@@ -22,7 +22,7 @@ Please do **not** open a public issue for a security problem.
 
 Be aware of the honest expectation: reports may be read late or not at all, and there is
 no commitment to triage, fix, publish an advisory, or reply. If GitHub's reporting form is
-unavailable (archived repositories can have it disabled), there is no monitored channel —
+unavailable (it can be disabled per repository), there is no monitored channel —
 assume the finding will not reach anyone and act accordingly. Forking and fixing is the
 reliable path.
 
