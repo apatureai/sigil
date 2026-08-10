@@ -1,7 +1,5 @@
 # Sigil
 
-**Archived. Provided as-is; no updates expected.** Issues and pull requests are not monitored. Last verified working 2026-08-09 on macOS 15 + Node 24.14.0 + pnpm 10.34.3.
-
 Sigil audits an AI evaluation: it measures how trustworthy your LLM judge is, then finds the cheapest model that holds measured quality.
 
 ## Why this exists
