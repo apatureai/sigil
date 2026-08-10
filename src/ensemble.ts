@@ -4,8 +4,8 @@
  * A single LLM-judge is itself a model with its own failure modes, so a
  * regulator-grade assurance verdict should not rest on one. An ensemble of
  * calibrated judges votes on each output; the verdict is the majority (ties
- * resolve conservatively to FAIL — never wave something through on a split), the
- * confidence is the mean, and — critically — the inter-judge DISAGREEMENT is
+ * resolve conservatively to FAIL, never waving something through on a split),
+ * the confidence is the mean, and, critically, the inter-judge DISAGREEMENT is
  * disclosed alongside ECE/Brier as a first-class reliability signal. High
  * disagreement means the measurement itself is uncertain, and hiding that would
  * defeat the whole point of independent assurance.

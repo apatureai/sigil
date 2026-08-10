@@ -16,7 +16,7 @@ import {
 /**
  * Golden, financial-services-shaped end-to-end audit. Two task families
  * (credit-memo summarization, SAR/fraud-narrative drafting), a three-model
- * panel, human labels, a calibrated judge — run all the way through to the
+ * panel, human labels, a calibrated judge, run all the way through to the
  * exported, egress-checked deliverable. This is the deterministic regression
  * that proves the whole pipeline (TRD §7) and doubles as the demo.
  */

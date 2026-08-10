@@ -1,28 +1,28 @@
 /**
- * Adaptive conformal intervals for trend forecasts (Gibbs–Candès, "Adaptive
+ * Adaptive conformal intervals for trend forecasts (Gibbs-Candès, "Adaptive
  * Conformal Inference Under Distribution Shift", NeurIPS 2021).
  *
  * Extends the harness's distribution-free guarantee story from static gates
  * (conformal.ts) and sequential alarms (drift.ts) to FORECAST INTERVALS on
  * short business-cadence series (entropy trends, telemetry, quarterly
  * metrics): offer an interval around each forecast whose miscoverage level
- * ADAPTS online — after a miss the level tightens toward wider intervals,
- * after a cover it relaxes — so that long-run empirical coverage tends to the
+ * ADAPTS online (after a miss the level tightens toward wider intervals,
+ * after a cover it relaxes), so that long-run empirical coverage tends to the
  * target under ARBITRARY distribution shift, with no distributional model of
  * the series at all.
  *
  * Honest edges, stated rather than hidden:
- *  - the Gibbs–Candès guarantee is LONG-RUN average coverage; locally the
+ *  - the Gibbs-Candès guarantee is LONG-RUN average coverage; locally the
  *    interval can under-cover (the PID-control extension is the upgrade path
  *    if bands oscillate);
  *  - textbook ACI lets the adaptive level exit [0,1] (an excursion below 0
  *    meaning "offer the infinite interval"); we clamp to [0.001, 0.999] to
  *    keep widths finite and states serializable, trading a corner of the
- *    asymptotic argument for bounded artifacts — the clamp is disclosed in
+ *    asymptotic argument for bounded artifacts. The clamp is disclosed in
  *    the statement;
  *  - when history is too short to certify the requested level (the conformal
  *    rank exceeds the sample), the module ABSTAINS (returns no interval)
- *    instead of offering an uncertified width — the house pattern.
+ *    instead of offering an uncertified width, the house pattern.
  *
  * Pure and deterministic; state is plain serializable data (persist, resume,
  * replay). No model, network, key, or clock.
@@ -138,7 +138,7 @@ export interface AciUpdate {
 
 /**
  * Score the in-force interval against the realized value, adapt α_t
- * (only when an interval was actually offered — an abstention cannot miss),
+ * (only when an interval was actually offered, since an abstention cannot miss),
  * and append the new residual. Pure; the input state is unchanged.
  */
 export function updateAci(state: AciState, update: AciUpdate): AciState {

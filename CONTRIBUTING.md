@@ -25,14 +25,14 @@ pnpm lint        # eslint .
 pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
-Those five are the whole gate — they are exactly what `.github/workflows/ci.yml` runs, in
+Those five are the whole gate, and exactly what `.github/workflows/ci.yml` runs, in
 that order. All of them pass on a clean checkout (verified on Node 24.14.0 with pnpm
 10.34.3).
 
 `pnpm build` is not part of the day-to-day source workflow: the package is `private`, was
 never published to npm, and `tsconfig.json` sets `noEmit: true`, so `pnpm typecheck` is the
-real compile gate. The build exists so `src/bin.ts` — the CLI entry point, `audit
-<corpus-dir> [out-dir]` — can actually be run:
+real compile gate. The build exists so `src/bin.ts`, the CLI entry point (`audit
+<corpus-dir> [out-dir]`), can actually be run:
 
 ```sh
 pnpm build
@@ -49,7 +49,7 @@ Sigil is **offline and deterministic by construction**, and the tests enforce it
   **No test may call a real model, key, or network.** The live adapter
   (`src/gateway-openai-compat.ts`) is exercised only through an injected `fetchImpl`.
 - No wall clock and no RNG in the analysis path. The same frozen corpus and frozen panel
-  must produce the same frontier and a byte-identical report — that reproducibility is the
+  must produce the same frontier and a byte-identical report. That reproducibility is the
   product, not a nicety. `test/golden-fs.test.ts` and `test/canonical.test.ts` will catch you.
 - Artifacts that leave the client boundary carry derived facts only; `assertSafeEgress`
   fails closed. Do not widen what crosses that line.

@@ -3,9 +3,9 @@
  *
  * The harness runs the candidate panel through an injected `Gateway`. Production
  * wires this to LiteLLM/OpenRouter inside the CLIENT'S environment with the
- * CLIENT'S keys; the harness itself never holds a key. Tests inject `StubGateway`
- * — a fixture map — so no real model, key, or network is ever touched (the hard
- * rule).
+ * CLIENT'S keys; the harness itself never holds a key. Tests inject
+ * `StubGateway`, a fixture map, so no real model, key, or network is ever
+ * touched (the hard rule).
  */
 
 export interface GatewayRequest {

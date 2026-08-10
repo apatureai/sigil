@@ -1,5 +1,5 @@
 /**
- * Audit harness (methodology: TRD §2) — the pipeline wiring.
+ * Audit harness (methodology: TRD §2): the pipeline wiring.
  *
  * Wires the pipeline: run a frozen panel over a frozen corpus via an injected
  * gateway -> judge each output with a calibrated judge -> aggregate per-family

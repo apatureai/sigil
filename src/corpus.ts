@@ -1,5 +1,5 @@
 /**
- * Corpus + rubric (methodology: TRD §2, steps 1–2).
+ * Corpus + rubric (methodology: TRD §2, steps 1-2).
  *
  * An audit measures the client's OWN quality bar, so the corpus is a
  * first-class, frozen, content-addressed artifact: the task families, the

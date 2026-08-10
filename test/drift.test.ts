@@ -13,7 +13,7 @@ import {
 
 /**
  * Anytime-valid drift monitor tests. All expectations are hand-computed from
- * the exact supermartingale arithmetic — no simulation, no randomness.
+ * the exact supermartingale arithmetic: no simulation, no randomness.
  */
 
 const feedE = (s: EProcessState, xs: number[]): EProcessState => xs.reduce(updateEProcess, s);

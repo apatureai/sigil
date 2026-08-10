@@ -6,7 +6,7 @@
  * custody layer: a detached signature over the canonical projection of
  * `{documentHash, markdownHash}` so a third party (examiner, counterparty
  * validation function) can verify OFFLINE that the artifact they hold is the
- * artifact the auditor produced — no network, no shared platform, no trust in
+ * artifact the auditor produced: no network, no shared platform, no trust in
  * the transport.
  *
  * Ports, per the hard rules: the harness holds NO key. `BundleSigner` /

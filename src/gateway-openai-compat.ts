@@ -2,7 +2,7 @@
  * Production Gateway adapter (TRD §4; methodology: TRD §2, step 2).
  *
  * Runs the candidate panel through an OpenAI-compatible chat-completions
- * endpoint — LiteLLM proxy and OpenRouter both speak this dialect — INSIDE the
+ * endpoint (LiteLLM proxy and OpenRouter both speak this dialect) INSIDE the
  * client's VPC with the client's key. The boundary rules, enforced here rather
  * than promised:
  *
@@ -10,7 +10,7 @@
  *   invoked per request; the key is never stored on the adapter, never logged,
  *   and scrubbed from every error this module can throw.
  * - **Egress allowlist at the network hop.** The adapter refuses to call any
- *   host not explicitly allowlisted by the client's run configuration — the
+ *   host not explicitly allowlisted by the client's run configuration, so the
  *   panel cannot be pointed at an unexpected endpoint by a task or fixture.
  * - **No retention.** The response is decoded, mapped to `GatewayResponse`,
  *   and returned; nothing is cached, logged, or written.
@@ -43,7 +43,7 @@ export interface OpenAiCompatGatewayOptions {
   /** Base URL of the in-VPC LiteLLM proxy / OpenRouter endpoint (no trailing slash). */
   baseUrl: string;
   /**
-   * Hosts the adapter may call — the network half of the egress allowlist.
+   * Hosts the adapter may call: the network half of the egress allowlist.
    * `baseUrl`'s host must be present; there is no implicit default.
    */
   allowedHosts: readonly string[];
@@ -80,7 +80,7 @@ function resolveCostUsd(body: ChatCompletionBody, headers: Headers): number | nu
 }
 
 /**
- * Build the production gateway. Pure construction — nothing is contacted until
+ * Build the production gateway. Pure construction: nothing is contacted until
  * `run` is called, and every `run` re-checks the allowlist and re-reads the key.
  */
 export function createOpenAiCompatGateway(options: OpenAiCompatGatewayOptions): Gateway {
@@ -92,7 +92,7 @@ export function createOpenAiCompatGateway(options: OpenAiCompatGatewayOptions): 
   return {
     async run(request: GatewayRequest): Promise<GatewayResponse> {
       if (!allowedHosts.includes(url.host)) {
-        // Refused BEFORE any network call — the egress allowlist's network half.
+        // Refused BEFORE any network call: the egress allowlist's network half.
         throw new GatewayError(
           "host_not_allowlisted",
           `gateway host "${url.host}" is not on the egress allowlist`,
@@ -123,7 +123,7 @@ export function createOpenAiCompatGateway(options: OpenAiCompatGatewayOptions): 
       const latencyMs = Math.max(0, Math.round(nowMs() - started));
 
       if (!response.ok) {
-        // Status only — the error body could echo the prompt, which must not
+        // Status only, because the error body could echo the prompt, which must not
         // propagate into anything that might later egress.
         throw new GatewayError("http_error", `gateway responded ${response.status} for ${request.model}/${request.taskId}`);
       }

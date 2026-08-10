@@ -3,7 +3,7 @@ import { initAci, intervalFor, updateAci, type AciState } from "../src/index.js"
 
 /**
  * Adaptive conformal interval tests. All expectations hand-computed from the
- * conformal-rank and adaptation arithmetic — no simulation, no randomness.
+ * conformal-rank and adaptation arithmetic: no simulation, no randomness.
  */
 
 /** Feed points with forecast 0 so each |actual| becomes the residual. */

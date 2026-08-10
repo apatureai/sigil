@@ -1,11 +1,11 @@
 /**
- * Report generator (methodology: TRD §2, step 7) — the finance/security-signable
+ * Report generator (methodology: TRD §2, step 7): the finance/security-signable
  * deliverable.
  *
  * Turns an `AuditReport` into a deterministic, structured document plus a
  * markdown render an MRM / CISO can act on. It restates only what the audit
  * measured (calibrated quality with disclosed judge reliability, run-to-run
- * variance, the efficiency frontier and the equal-quality saving) — it invents
+ * variance, the efficiency frontier and the equal-quality saving), and invents
  * nothing. Content-addressed so the artifact is reproducible.
  */
 
@@ -47,7 +47,7 @@ export interface AuditReportDocument {
   meta: ReportMeta;
   judge: { ece: number; brier: number; sampleSize: number };
   findings: ReportFinding[];
-  /** Lowest Pass^k observed per model — the run-to-run reliability exposure. */
+  /** Lowest Pass^k observed per model: the run-to-run reliability exposure. */
   reliabilityExposure: Array<{ model: string; minPassHatK: number }>;
   /** Present only when a certificate was computed (see ReportEvidence). */
   abstention?: {
@@ -116,7 +116,7 @@ export function buildReportDocument(
 
   // Evidence blocks are ADDITIVE: absent evidence leaves the document (and its
   // hash) byte-identical to the pre-evidence format. The document restates
-  // only what was measured — statements are carried verbatim.
+  // only what was measured; statements are carried verbatim.
   if (evidence.abstention !== undefined) {
     const a = evidence.abstention;
     body.abstention = {

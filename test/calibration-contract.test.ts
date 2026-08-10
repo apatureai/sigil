@@ -6,13 +6,13 @@ import type { JudgePrediction } from "../src/metrics.js";
 
 /**
  * Calibration contract: the canonical ECE/Brier implementation lives upstream
- * in apatureai/judgment-engine (`@engine/eval`); sigil MIRRORS it — with no
- * dependency in either direction — and this test pins the mirror to a frozen
+ * in apatureai/judgment-engine (`@engine/eval`); sigil MIRRORS it, with no
+ * dependency in either direction, and this test pins the mirror to a frozen
  * golden fixture copied from that upstream generator. The vectors include
  * exact bin-edge confidences, the FP-sensitive inputs where a
  * binning-convention drift shows up first. If this test and the upstream's own
- * contract test ever disagree, one side changed the math unilaterally — the
- * exact failure mode the contract exists to catch.
+ * contract test ever disagree, one side changed the math unilaterally, which is
+ * the exact failure mode the contract exists to catch.
  *
  * The golden is a committed snapshot, not a live check: regenerating it
  * requires the upstream repo, so treat these vectors as frozen.

@@ -1,9 +1,9 @@
 /**
- * Run-to-run reliability — Pass^k (methodology: TRD §2, step 4).
+ * Run-to-run reliability: Pass^k (methodology: TRD §2, step 4).
  *
  * Point-estimate evals hide the "different output every run" risk. Given a
  * model's per-run pass/fail over the same task, Pass^k is the probability that k
- * independent runs ALL clear the bar — the axis a risk owner cares about. We use
+ * independent runs ALL clear the bar, the axis a risk owner cares about. We use
  * the unbiased combinatorial estimator (probability a random k-subset of the
  * observed runs all pass), which avoids the optimism of naively powering the
  * point pass-rate.

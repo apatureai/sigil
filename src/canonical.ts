@@ -1,5 +1,5 @@
 /**
- * Canonical JSON + content hashing — the reproducibility primitive.
+ * Canonical JSON + content hashing: the reproducibility primitive.
  *
  * The audit's promise is that the same corpus + frozen panel always produces the
  * same frontier (methodology: TRD §2). Content-addressing the corpus and the report

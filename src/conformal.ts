@@ -1,5 +1,5 @@
 /**
- * Finite-sample risk certificates + certified abstention — the examiner-grade
+ * Finite-sample risk certificates + certified abstention: the examiner-grade
  * upgrade over calibration diagnostics.
  *
  * ECE/Brier (metrics.ts) DESCRIBE the judge's reliability; they promise
@@ -8,25 +8,25 @@
  * Learn-Then-Test risk control (Angelopoulos, Bates et al.; selective
  * classification à la Geifman & El-Yaniv):
  *
- *  - `clopperPearsonUpper` / `clopperPearsonLower` — exact one-sided binomial
+ *  - `clopperPearsonUpper` / `clopperPearsonLower`, exact one-sided binomial
  *    bounds. With e judge errors in n labeled cases, the audit can state:
  *    "with confidence ≥ 1−δ, the judge's true error rate is ≤ U(e,n,δ)."
- *  - `certifyAbstentionThreshold` — fixed-sequence Learn-Then-Test over a
+ *  - `certifyAbstentionThreshold`, fixed-sequence Learn-Then-Test over a
  *    DATA-INDEPENDENT confidence grid: walk thresholds from most to least
  *    conservative; at each, test H0 "selective error > α" with the exact
- *    Clopper–Pearson bound; stop at the first failure. The returned threshold
+ *    Clopper-Pearson bound; stop at the first failure. The returned threshold
  *    keeps the family-wise 1−δ guarantee because the tests are a priori
  *    ordered and each spends the full δ conditionally on all previous
  *    rejections (fixed-sequence testing).
  *
  * The product sentence this buys: "on the X% of cases the judge accepts, its
  * error rate is ≤ α with confidence 1−δ; the rest are explicitly abstained to
- * human review" — SR 26-2's effective-challenge posture as machinery, not
- * prose.
+ * human review". That is SR 26-2's effective-challenge posture as machinery,
+ * not prose.
  *
  * Honest scope, disclosed rather than hidden:
  *  - Validity assumes the labeled calibration cases and deployment cases are
- *    exchangeable draws from the same task distribution. Drift breaks that —
+ *    exchangeable draws from the same task distribution. Drift breaks that,
  *    which is exactly why re-certification is expected on a recurring cadence,
  *    never a one-shot certificate.
  *  - Small n gives wide (honest) bounds. The bound is reported with its sample
@@ -61,7 +61,7 @@ function binomialCdf(e: number, n: number, p: number): number {
 }
 
 /**
- * Exact one-sided Clopper–Pearson UPPER bound on a binomial proportion: the
+ * Exact one-sided Clopper-Pearson UPPER bound on a binomial proportion: the
  * smallest p with P(X ≤ errors | n, p) ≤ delta. With zero errors this is the
  * closed form 1 − δ^(1/n) ("rule of three" family). `errors = n` returns 1.
  */
@@ -85,7 +85,7 @@ export function clopperPearsonUpper(errors: number, n: number, delta: number): n
 }
 
 /**
- * Exact one-sided Clopper–Pearson LOWER bound on a success proportion: with s
+ * Exact one-sided Clopper-Pearson LOWER bound on a success proportion: with s
  * successes in n trials, `1 − upperBound(failure rate)`. All-successes gives
  * the closed form δ^(1/n).
  */

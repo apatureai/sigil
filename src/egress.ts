@@ -1,9 +1,9 @@
 /**
- * Egress guard (TRD §4) — the boundary that makes "your data never
+ * Egress guard (TRD §4): the boundary that makes "your data never
  * leaves" enforceable, not just a promise.
  *
  * Every artifact that crosses out of the client VPC (report document, router
- * policy, governance map) must carry ONLY derived facts — scores, metrics, the
+ * policy, governance map) must carry ONLY derived facts: scores, metrics, the
  * frontier, ids, hashes. This guard fails CLOSED: it refuses to release an
  * artifact that contains a raw model output / prompt (passed as the forbidden
  * set) or anything matching a credential pattern. In financial-services model

@@ -3,10 +3,10 @@
  * values; these properties assert the mathematical guarantees the audit SELLS,
  * over generated inputs:
  *
- *  - Clopper–Pearson bounds live in [0,1], bracket the point estimate, and are
+ *  - Clopper-Pearson bounds live in [0,1], bracket the point estimate, and are
  *    monotone in errors and in the confidence demanded.
  *  - McNemar's exact test is symmetric, maximal on balanced discordance, and
- *    monotone in imbalance — so `verifySwitchQuality` can only refuse a switch
+ *    monotone in imbalance, so `verifySwitchQuality` can only refuse a switch
  *    when the discordance is AGAINST the candidate.
  *  - Certified Pass^k floors never exceed the observed rate and respond to
  *    k / passes the way the formula promises.

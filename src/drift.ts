@@ -1,14 +1,14 @@
 /**
- * Anytime-valid drift monitoring — e-processes and e-detectors for bounded
+ * Anytime-valid drift monitoring: e-processes and e-detectors for bounded
  * metrics (the SR 26-2 "ongoing monitoring" companion to the static
  * certificates in conformal.ts).
  *
  * The construction is the betting supermartingale for bounded observations
- * (Shin–Ramdas–Rinaldo e-detectors, arXiv 2203.03532; Waudby-Smith–Ramdas
+ * (Shin-Ramdas-Rinaldo e-detectors, arXiv 2203.03532; Waudby-Smith-Ramdas
  * betting line): for x_t ∈ [0,1] and H0 "true mean ≤ μ0", each factor
  * 1 + λ(x_t − μ0) with λ ∈ [0, 1/μ0) has expectation ≤ 1 under H0, so the
  * running product is a nonnegative supermartingale. Two monitors, with two
- * DIFFERENT guarantees — the statements below never blur them:
+ * DIFFERENT guarantees, and the statements below never blur them:
  *
  *  - `EProcess` (fixed-null sequential test): by Ville's inequality, alarming
  *    when the e-value reaches 1/α bounds the probability of EVER false-alarming
@@ -25,7 +25,7 @@
  * per-λ CUSUM stats keeps the ARL bound) replaces tuning: no optimization, no
  * randomness, no wall clock. State is a plain serializable object so a
  * monitoring run can be persisted, resumed, and independently REPLAYED from
- * the observation log — the same reproducibility posture as the rest of the
+ * the observation log, the same reproducibility posture as the rest of the
  * harness. Classical one-sided CUSUM (Page) ships alongside as the
  * weaker-guarantee baseline the fixtures compare against.
  *

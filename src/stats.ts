@@ -1,15 +1,15 @@
 /**
  * Statistical evidence for the audit's two headline claims.
  *
- * 1. "Switch X→Y, save Z% at held quality" (frontier.ts) — a point comparison
+ * 1. "Switch X→Y, save Z% at held quality" (frontier.ts). A point comparison
  *    of aggregate quality is not examiner evidence. `verifySwitchQuality` runs
  *    an exact two-sided McNemar test on PAIRED per-task outcomes (same task,
  *    both models) and refuses to call a switch defensible when the candidate
  *    is significantly worse. The disclosure ships either way.
  *
- * 2. Pass^k (reliability.ts) — the unbiased estimator describes the observed
+ * 2. Pass^k (reliability.ts). The unbiased estimator describes the observed
  *    runs. `certifiedPassKLowerBound` adds the finite-sample floor: an exact
- *    Clopper–Pearson lower bound on the per-run pass rate, powered to k, under
+ *    Clopper-Pearson lower bound on the per-run pass rate, powered to k, under
  *    the disclosed assumption of independent identically-distributed runs.
  *    "Pass^3 ≥ 41% with 95% confidence" is a statement a risk owner can file;
  *    a bare point estimate is not.
@@ -90,7 +90,7 @@ export interface SwitchQualityEvidence {
  * Evidence gate behind "equal-or-better quality": the switch claim is
  * defensible unless the paired test shows the candidate significantly worse
  * (p < α with the discordance against the candidate). "Not significantly
- * different" is reported as exactly that — never inflated into "equal".
+ * different" is reported as exactly that, never inflated into "equal".
  */
 export function verifySwitchQuality(
   pairs: readonly PairedOutcome[],
@@ -139,10 +139,10 @@ export interface CertifiedPassK {
 }
 
 /**
- * Finite-sample floor on Pass^k: exact Clopper–Pearson lower bound on the
+ * Finite-sample floor on Pass^k: exact Clopper-Pearson lower bound on the
  * per-run pass probability, raised to k. Assumes runs are independent draws of
- * the same configuration — the assumption is part of the statement, because an
- * examiner will ask.
+ * the same configuration, and that assumption is part of the statement, because
+ * an examiner will ask.
  */
 export function certifiedPassKLowerBound(
   trials: readonly boolean[],

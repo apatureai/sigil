@@ -3,7 +3,7 @@
  *
  * Per task family, the Pareto-optimal set over quality (higher better), cost and
  * latency (lower better), plus the equal-or-better-quality switch that saves the
- * most money. Savings are only claimed when measured quality is held — never the
+ * most money. Savings are only claimed when measured quality is held, never the
  * headline router-marketing number.
  */
 

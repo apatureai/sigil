@@ -1,5 +1,5 @@
 /**
- * Rank-vs-score decoupling — ordinal reliability the calibration metrics miss.
+ * Rank-vs-score decoupling: ordinal reliability the calibration metrics miss.
  *
  * `metrics.ts` measures whether the judge's *confidence* is calibrated (ECE/Brier)
  * and `reliability.ts` measures run-to-run stability (Pass^k). Neither asks the
@@ -15,7 +15,7 @@
  *    ordering (Kendall's tau-b), and
  *  - the empirical width of the score->quality residual interval, normalized to the
  *    score range.
- * A judge can score well on the first and badly on the second — that is exactly the
+ * A judge can score well on the first and badly on the second. That is exactly the
  * regime where "use the ranking, distrust the number" is the correct guidance.
  *
  * Diagnostic only: it never edits scoring or report output. Pure and deterministic.
@@ -37,7 +37,8 @@ export interface ScoredObservation {
  * tau-b = (n_c - n_d) / sqrt((n_0 - n_1) * (n_0 - n_2)), where n_0 = n(n-1)/2 is the
  * total pair count, n_c/n_d are concordant/discordant pairs, and n_1/n_2 are the
  * pairs tied within `a`/`b` respectively. Returns 0 when n < 2 or the tie-adjusted
- * denominator is 0 (e.g. every value in a vector is identical — no order to compare).
+ * denominator is 0 (e.g. every value in a vector is identical, so there is no order
+ * to compare).
  */
 export function kendallTauB(a: readonly number[], b: readonly number[]): number {
   if (a.length !== b.length) throw new Error("kendallTauB: vectors must be equal length");
@@ -65,7 +66,7 @@ export function kendallTauB(a: readonly number[], b: readonly number[]): number 
   return (concordant - discordant) / denom;
 }
 
-/** Sum over tie groups of t(t-1)/2 — the number of pairs tied on this vector. */
+/** Sum over tie groups of t(t-1)/2, i.e. the number of pairs tied on this vector. */
 function tiePairs(values: readonly number[]): number {
   const counts = new Map<number, number>();
   for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
@@ -98,7 +99,7 @@ export interface CardinalIntervalOptions {
 
 /**
  * Empirical width of the score->quality residual interval, normalized to the score
- * range — the paper's "cardinal scores carry wide intervals" made concrete.
+ * range: the paper's "cardinal scores carry wide intervals" made concrete.
  *
  * The residual for each observation is `judgeScore - trueQuality` (both on the same
  * scale). We take the central `centralMass` spread of those residuals as a
@@ -131,7 +132,7 @@ export function cardinalIntervalWidth(
   return { n, centralMass, lower, upper, rawWidth, normalizedWidth };
 }
 
-/** Verdict on which of the judge's two signals — order vs magnitude — can be trusted. */
+/** Verdict on which of the judge's two signals, order or magnitude, can be trusted. */
 export type RankScoreVerdict =
   | "trust-order-not-magnitude"
   | "scores-reliable"
@@ -163,7 +164,7 @@ export interface RankScoreOptions extends CardinalIntervalOptions {
  *  - tau-b < tauThreshold               -> 'both-weak' (order itself is untrustworthy)
  *  - interval width < widthThreshold    -> 'scores-reliable' (order good AND magnitude tight)
  *  - otherwise                          -> 'trust-order-not-magnitude'
- *      (tau-b >= tauThreshold AND width >= widthThreshold — the paper's core regime)
+ *      (tau-b >= tauThreshold AND width >= widthThreshold: the paper's core regime)
  */
 export function rankScoreDecoupling(
   observations: readonly ScoredObservation[],

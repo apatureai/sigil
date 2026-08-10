@@ -12,7 +12,7 @@ import {
 
 /**
  * Signed report bundle tests (#17). Keys are generated in-process for the test
- * only — the harness itself holds no key (BundleSigner/Verifier are injected
+ * only; the harness itself holds no key (BundleSigner/Verifier are injected
  * ports). Verification is offline and fail-closed: every tamper class is a
  * named reason.
  */

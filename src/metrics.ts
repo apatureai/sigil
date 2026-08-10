@@ -38,7 +38,7 @@ function clamp01(n: number): number {
 /**
  * Partition predictions into `bins` equal-width confidence buckets.
  *
- * Bin assignment is `floor(confidence / width)` (last bin inclusive of 1) —
+ * Bin assignment is `floor(confidence / width)` (last bin inclusive of 1),
  * deliberately IDENTICAL to the canonical upstream convention, including
  * its floating-point behavior at bin edges, so the two repos' calibration
  * numbers can never disagree (pinned by the golden fixture in

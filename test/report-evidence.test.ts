@@ -15,7 +15,7 @@ import {
 /**
  * Evidence wiring tests: the certificates and paired-evidence primitives now
  * flow into the shipped artifact (report document + markdown) and guard the
- * router policy. All blocks are ADDITIVE — the no-evidence document is
+ * router policy. All blocks are ADDITIVE: the no-evidence document is
  * byte-identical to the pre-evidence format, so golden hashes are stable.
  */
 

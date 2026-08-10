@@ -1,11 +1,11 @@
 /**
- * CLI / runner (backlog #12) — `audit <corpus-dir> [out-dir]`.
+ * CLI / runner (backlog #12): `audit <corpus-dir> [out-dir]`.
  *
  * The CLI operates OFFLINE on a results bundle: the panel run happens in the
  * client VPC and is captured as fixtures; the CLI then judges, scores, builds
  * the frontier, and writes the report + neutral router policy + governance map.
  * It calls no model itself (the panel outputs are supplied), and it enforces the
- * egress guard before writing anything — so nothing but derived facts is ever
+ * egress guard before writing anything, so nothing but derived facts is ever
  * written to disk. Deterministic for a given bundle.
  */
 
@@ -101,7 +101,7 @@ export function loadBundle(dir: string): AuditBundle {
   return bundle;
 }
 
-/** Write the artifacts to an output directory (derived facts only — egress already enforced). */
+/** Write the artifacts to an output directory (derived facts only; egress already enforced). */
 export function writeArtifacts(outDir: string, artifacts: AuditArtifacts): void {
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, "report.json"), JSON.stringify(artifacts.report, null, 2));

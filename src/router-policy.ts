@@ -1,14 +1,13 @@
 /**
- * Router-policy exporter (methodology: TRD §2, step 8) — a portable routing
+ * Router-policy exporter (methodology: TRD §2, step 8): a portable routing
  * policy export, kept vendor-NEUTRAL.
  *
  * Translates the measured efficiency frontier into a portable routing policy the
  * client keeps and loads into whatever router they run (LiteLLM / OpenRouter /
  * NotDiamond). We export the policy; we are not the router and take no stake in
- * which model wins — the policy simply encodes "per task family, the cheapest
+ * which model wins. The policy simply encodes "per task family, the cheapest
  * model that held the measured quality bar, with the frontier as fallbacks."
- * The policy is exported for the operator to load into whatever router they
- * run; this module never routes traffic itself.
+ * This module never routes traffic itself.
  */
 
 import type { AuditReport } from "./harness.js";
@@ -46,7 +45,7 @@ export interface RouterPolicyOptions {
 /**
  * Build a neutral routing policy from the audit. `qualityFloor` is the minimum
  * calibrated quality a routed model must meet; only frontier models at or above
- * it are eligible, ordered cheapest-first — unless the family's own switch
+ * it are eligible, ordered cheapest-first, unless the family's own switch
  * evidence says cheaper-at-equal-quality is not defensible, in which case the
  * family is ordered quality-first and annotated.
  */
