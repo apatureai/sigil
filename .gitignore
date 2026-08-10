@@ -3,6 +3,8 @@ dist/
 # README quickstart scratch: the audit output dir and the library example file
 /out/
 /example.ts
+# the CLI's default out-dir when no out-dir is passed: <bundle-dir>/out
+examples/*/out/
 *.tsbuildinfo
 coverage/
 .vitest/

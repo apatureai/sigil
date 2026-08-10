@@ -54,14 +54,15 @@ sibling repo.
 
 | Thing | Need | Check |
 |---|---|---|
-| Node | v24.x (`engines: >=24 <25`, pinned by `.node-version`) | `node -v  # need v24.x` |
+| Node | 24 or newer (`engines: >=24`; `.node-version` pins 24, which is what CI and every verification run used) | `node -v  # need v24 or newer` |
 | pnpm | 9 or 10 (`lockfileVersion: 9.0`) | `pnpm -v  # need 9.x or 10.x` |
 | OS | verified on macOS 15 (Darwin 24.6.0); CI runs ubuntu-latest | n/a |
 
 If pnpm is missing: `corepack enable pnpm` (ships with Node), or `npm install -g pnpm`.
 
 **No credentials, no API keys, no network access are needed for anything in this README.** Sigil
-reads no environment variables at all (`grep -rn "process.env" src/` returns only `process.argv`).
+reads no environment variables at all (`grep -rn "process.env" src/` finds nothing and exits 1; the
+only `process` use in `src/` is `argv`, `exit`, and writes to stderr).
 Dependencies are pinned, `pnpm-lock.yaml` is committed, and every command below installs with
 `--frozen-lockfile`.
 
@@ -204,12 +205,15 @@ $ cat out/governance.json
 node dist/bin.js <bundle-dir> [out-dir]
 ```
 
-`out-dir` defaults to `<bundle-dir>/out`. Exit code `0` on success, `2` with a usage message when
-`<bundle-dir>` is omitted, `1` on any failure (including an egress violation, in which case the CLI
-writes nothing at all).
+`out-dir` defaults to `<bundle-dir>/out`, which writes inside the bundle directory, so pass an
+explicit out-dir if you want the output somewhere else. Exit code `0` on success, `2` with a usage
+message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, in which
+case the CLI writes nothing at all).
 
 There is no `bin` field in `package.json` and the package was never published to npm, so there is
-no installable `sigil` command. Invoke the built entry point directly, as above.
+no installable `sigil` command. Invoke the built entry point directly, as above. The usage line it
+prints on exit `2` reads `usage: audit <corpus-dir> [out-dir]`, using the tool's internal name;
+`audit` is not a command you can install either.
 
 ### The input bundle
 
@@ -566,9 +570,9 @@ imports nothing from any sibling repo. The whole argument for it was that an aud
 independent if the auditor also sells you the thing being audited. Its only connection to the rest
 of the stack is a *contract*, not a dependency: the ECE/Brier/reliability math in `metrics.ts`
 mirrors the canonical implementation that lived in a sibling repo, `judgment-engine`, pinned by a
-copied golden fixture so the two can never silently diverge. The other components (`gate`,
-`ui-graph`, `ui-dna`, `entropy-engine`, `mcp-review`) are separate repositories, each with its own
-README.
+copied golden fixture so the two can never silently diverge. The other components released
+alongside it (`gate`, `ui-graph`, `ui-dna`, `mcp-review`) are separate repositories, each with its
+own README.
 
 ## Contributing
 
