@@ -1,57 +1,70 @@
 # Security Policy
 
-## Status: unmaintained
+## Supported versions
 
-This repository is an **archived public release**. The project it belonged to has been
-wound down. There is:
+| Version | Supported |
+|---|---|
+| `main` | Yes. Fixes land on `main` |
+| Tagged releases | None yet; the package is not published to npm. Track `main` |
 
-- **no active security support**: no patches, no backports, no advisories;
-- **no supported version** (nothing here is maintained, including `main`);
-- **no bug bounty** and no reward of any kind.
+Sigil has **zero runtime dependencies**: every import outside the repo is a Node built-in
+(`node:crypto`, `node:fs`, `node:path`). The supply-chain surface is the dev toolchain only
+(TypeScript, ESLint, Vitest and their transitive tree, pinned by `pnpm-lock.yaml`), and that is
+updated periodically on `main`.
 
-The code is published as-is under the MIT License, whose warranty disclaimer applies in
-full. Treat it as reference material, not as a maintained dependency.
+## Reporting a vulnerability
 
-## Reporting a vulnerability anyway
+Use GitHub's private vulnerability reporting on this repository: the **Security** tab, then
+**Report a vulnerability**. It is enabled, and it keeps the report out of public view while it is
+being handled.
 
-If you find something and want it on the record, use GitHub's private vulnerability
-reporting on this repository (**Security** tab → **Report a vulnerability**). That keeps
-the report out of public view while it is read.
+**Please do not open a public issue for a security problem.**
 
-Please do **not** open a public issue for a security problem.
+What to include: affected file or module, what an attacker can do, and the smallest reproduction
+you have. A failing test is ideal, given that the whole harness runs offline.
 
-The honest expectation: reports may be read late or not at all, and there is
-no commitment to triage, fix, publish an advisory, or reply. If GitHub's reporting form is
-unavailable (it can be disabled per repository), there is no monitored channel at all, so
-assume the finding will not reach anyone and act accordingly. Forking and fixing is the
-reliable path.
+What to expect:
+
+- An acknowledgement that the report was received, normally within a few days.
+- An assessment of whether it is in scope and how severe it looks, with the reasoning shared with
+  you rather than just a verdict.
+- A fix on `main` for anything confirmed, and credit in the advisory unless you ask otherwise.
+- A GitHub security advisory published for anything that affects people running the code.
+
+This is a small project maintained by one person, so response times are best effort rather than
+contractual. There is no bug bounty and no monetary reward.
+
+## Scope
+
+**In scope:** anything that lets an artifact leak data it should not carry (the `egress.ts`
+boundary), anything that makes a signed bundle verify when it should not (`bundle.ts`), key
+handling in `src/gateway-openai-compat.ts`, host-allowlist bypasses in that adapter, and any path
+traversal or unsafe write in the CLI.
+
+**Not in scope:** advisories in dev dependencies that do not affect anyone running the library
+(report them as normal issues, they are still worth having), and statistical validity questions,
+which are correctness bugs rather than vulnerabilities and belong in a public issue where they can
+be argued in the open.
 
 ## If you are going to run this code
 
-Sigil is an offline, deterministic audit harness with **zero runtime dependencies**. Every
-import outside the repo is a Node built-in (`node:crypto`, `node:fs`, `node:path`). That
-keeps the supply-chain surface small, but there are specific things to review before
-pointing it at anything real:
+There are specific things to review before pointing it at anything real:
 
 - **One module talks to the network.** `src/gateway-openai-compat.ts` is the only code that
-  performs egress: it calls an OpenAI-compatible chat-completions endpoint via `fetch`, and
-  it takes a `getApiKey()` accessor that is invoked per request. It enforces an explicit
-  `allowedHosts` list and scrubs the key from the errors it raises. Everything else in the
-  repo (the judge, frontier, certificates, drift, report, and the `audit` CLI) is pure and
-  operates on captured fixtures. Review this adapter before wiring a live key to it.
-- **The egress guard is defense-in-depth, not a guarantee.** `src/egress.ts` fails closed on
-  a fixed list of credential-shaped regexes and a caller-supplied forbidden set. A regex list
-  will not catch every secret shape, and it can only inspect what is passed to it. Do not
-  treat it as a compliance control on its own.
-- **Key custody is entirely the caller's.** `src/bundle.ts` signs and verifies report bundles
-  with Ed25519, but the harness holds no key by design: `ed25519Signer(privateKeyPem, keyId)`
-  takes a private key PEM directly into process memory. Production use was always intended to
-  inject a KMS/HSM-backed `BundleSigner` instead. Verification is fail-closed; signing safety
-  is on you.
-- **Dependencies are frozen in time.** The dev toolchain (TypeScript, ESLint, Vitest, and
-  their transitive tree, pinned by `pnpm-lock.yaml`) will accumulate published advisories and
-  nobody here will bump them. Re-resolve dependencies yourself before building on this.
+  performs egress: it calls an OpenAI-compatible chat-completions endpoint via `fetch`, and it takes
+  a `getApiKey()` accessor that is invoked per request. It enforces an explicit `allowedHosts` list
+  and scrubs the key from the errors it raises. Everything else in the repo (the judge, frontier,
+  certificates, drift, report, and the CLI) is pure and operates on captured fixtures. This adapter
+  has not yet been run against a live endpoint from this repo, so review it before wiring a real key
+  to it.
+- **The egress guard is defense in depth, not a guarantee.** `src/egress.ts` fails closed on a fixed
+  list of credential-shaped regexes and a caller-supplied forbidden set. A regex list will not catch
+  every secret shape, and it can only inspect what is passed to it. Do not treat it as a compliance
+  control on its own.
+- **Key custody is the caller's.** `src/bundle.ts` signs and verifies report bundles with Ed25519,
+  but the harness holds no key by design: `ed25519Signer(privateKeyPem, keyId)` takes a private key
+  PEM directly into process memory. For production use, inject a KMS or HSM-backed `BundleSigner`
+  instead. Verification is fail-closed; signing safety is on you.
 
-**Do not run this against production secrets, production endpoints, or regulated data
-without your own review.** Nothing in this repository has been security-reviewed for use
-outside its original private context.
+Nothing in this repository has been through an external security audit. The MIT License's warranty
+disclaimer applies in full.

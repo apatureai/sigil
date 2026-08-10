@@ -1,71 +1,121 @@
 # Sigil
 
-Sigil audits an AI evaluation: it measures how trustworthy your LLM judge is, then finds the cheapest model that holds measured quality.
+**Error bars for LLM-as-judge evals: calibration, finite-sample risk certificates, and anytime-valid drift monitoring, in dependency-free TypeScript.**
 
-## Why this exists
+If you use a model to grade another model's output, you have a ruler you have never measured.
+Sigil measures it. Give it your judge's verdicts, a set of human-labeled examples, and a captured
+run of the models you are comparing, and it will tell you how well calibrated the judge is, what
+confidence threshold you can defensibly abstain at, how reliable each model is across repeated
+runs, and which cheaper model actually holds quality once a paired significance test has had its
+say.
 
-Sigil was built inside Apature, a venture-stage product that has been wound down, and is released
-here under the MIT License. It was aimed at model-risk management at a regulated financial
-institution (a team that must independently validate a vendor LLM it cannot open up), but nothing
-in the code is finance-specific. It is a general-purpose, dependency-free measurement engine that
-calls no model, holds no key, and opens no socket.
+It is a pure measurement engine. It calls no model, holds no key, and opens no socket. You supply
+the judge and the labels; Sigil scores them and emits a byte-reproducible report.
 
-That neutrality was a design constraint rather than an accident: an audit produced by a company
-that also sells you a model or a router is not an independent audit, so this engine was kept
-structurally separate from everything else in the stack and has zero code dependency on any
-sibling repo.
+```
+pnpm install --frozen-lockfile && pnpm build
+node dist/bin.js examples/credit-memo out/ && cat out/report.md
+```
 
-## What it does
+## Who this is for
 
-- **Scores the judge before it scores anything else**: expected calibration error, Brier score,
-  and a binned reliability table over human-labeled examples.
-- **Certifies an abstention threshold** with exact Clopper-Pearson bounds and fixed-sequence
-  Learn-Then-Test, or explicitly refuses to certify when the sample cannot support it.
-- **Measures run-to-run reliability** with an unbiased combinatorial Pass^k estimator, plus a
-  certified finite-sample floor.
-- **Builds a Pareto frontier** over quality × cost × latency and names the cheapest candidate that
-  holds measured quality.
-- **Gates the savings claim on paired evidence**, using an exact two-sided McNemar test that marks
-  a switch *not defensible* when the cheaper candidate is significantly worse, whatever the cost
-  delta.
-- **Monitors drift anytime-validly** with betting supermartingales: a fixed-null e-process
-  (Ville's inequality) and a changepoint e-detector (ARL bound), with classical Page CUSUM as the
-  disclosed weaker baseline.
-- **Emits a deterministic, content-addressed report** (same inputs, byte-identical output) plus a
-  vendor-neutral router policy and a read-only least-privilege governance map.
-- **Signs and verifies bundles offline** with detached Ed25519 signatures, failing closed with
-  named reasons.
-- **Refuses to leak.** A fail-closed egress guard blocks any artifact whose serialization contains
-  a raw model output, a raw prompt, or a credential-shaped string.
+- **People running LLM-as-judge eval pipelines in Node** who need calibration numbers with error
+  bars rather than a single accuracy figure.
+- **Anyone shipping selective prediction** who is currently choosing an abstention threshold by
+  intuition and wants one with a finite-sample guarantee attached.
+- **Teams doing model-cost work** who need "switch to the cheaper model" to be an evidenced claim
+  rather than a comparison of two averages.
+- **JS/TS people locked out of the stats ecosystem.** Conformal prediction, e-processes and
+  sequential testing are almost entirely Python and R. This is one of very few JavaScript
+  implementations, and it has zero runtime dependencies.
 
-## What it does not do
+Sigil is deliberately vendor-neutral: it has no opinion about which model you should use and no
+code path that could profit from the answer.
 
-- It does not include an LLM judge. `Judge` is an interface; you supply the judge and the human
-  labels, Sigil scores them.
-- It does not call a model, hold a key, or open a network socket. The panel run is captured
-  upstream and supplied as data.
-- It does not route traffic, edit code, or mutate anything on your estate. Every artifact it
-  produces is derived facts only.
-- It is not a scheduler or a service. See [Limitations](#limitations).
+## Why it is technically interesting
+
+Most eval harnesses report a number. Sigil's premise is that **an unqualified number is not
+evidence**, and nearly every design decision follows from that.
+
+**1. The measurement is itself measured.** Before any quality claim, `metrics.ts` scores the judge
+against human labels: expected calibration error (does "0.8 confidence" hold about 80% of the
+time?), Brier score, and a binned reliability table. A badly calibrated judge is surfaced, not
+hidden.
+
+**2. Finite-sample guarantees, not asymptotics.** `conformal.ts` computes exact one-sided
+Clopper-Pearson binomial bounds on the judge's error rate, and certifies an *abstention threshold*
+via fixed-sequence Learn-Then-Test over a data-independent confidence grid: walk thresholds from
+most to least conservative, test at each with the exact bound, stop at the first failure. The
+family-wise guarantee survives because the tests are ordered a priori. The output is a sentence you
+can file: *"on the X% of cases the judge accepts, its error rate is at most alpha with confidence
+1 minus delta; the rest go to human review."* Exact bounds were chosen over Gaussian intervals
+because audit sample sizes are small. When nothing certifies, the module **refuses** rather than
+returning an uncertified threshold. Split conformal plus LTT was chosen over full conformal because
+it needs only the labeled corpus you already have.
+
+**3. Anytime-valid sequential monitoring.** `drift.ts` implements betting supermartingales over
+bounded [0,1] observation streams (judge-error indicators), with two constructions whose guarantees
+are deliberately never blurred: a fixed-null **e-process** where Ville's inequality bounds the
+probability of *ever* false-alarming over an unbounded horizon by alpha, and a changepoint
+**e-detector** (e-CUSUM style) that trades that for an average-run-length-to-false-alarm bound of
+at least 1/alpha in exchange for retained sensitivity to late changes. A lambda-grid mixture
+replaces hyperparameter tuning (a mixture of supermartingales is a supermartingale). Classical Page
+CUSUM ships alongside as the explicitly weaker disclosed baseline. Monitor state is plain
+serializable data, so a run can be persisted, resumed, and replayed from the observation log.
+
+**4. Headline claims are gated by evidence, and can fail.** "Switch model X to model Y, save 97% at
+equal quality" is a point comparison of aggregate means, not evidence. `stats.ts` runs an exact
+two-sided **McNemar test** on *paired* per-task outcomes and marks the switch **not defensible**
+when the cheaper candidate is significantly worse, regardless of how good the cost delta looks. "No
+detected loss" is reported as exactly that and never upgraded to "equal". Similarly, the Pass^k
+point estimate gets a certified Clopper-Pearson floor, with the i.i.d.-runs assumption stated in
+the output.
+
+**5. Ordinal and cardinal reliability are separated.** `rank-score.ts` measures Kendall's tau-b
+between judge scores and reference quality *and* the empirical width of the score-to-quality
+residual interval. A judge frequently ranks well while its absolute numbers are noise; that is
+precisely the regime where "use the ordering, distrust the magnitude" is the correct guidance, and
+it is invisible to ECE alone.
+
+**6. Determinism as an architectural constraint.** Canonical JSON (sorted keys, RFC-8785 style)
+plus SHA-256 content addressing for the corpus and the report. No RNG and no wall clock anywhere in
+the analysis path; the only injected non-determinism is the report timestamp, which is recorded
+rather than read from a clock. The same frozen corpus plus the same frozen panel produces a
+byte-identical report, which is what makes third-party reproduction possible at all.
+
+**7. Fail-closed data egress.** `egress.ts` refuses to release any artifact whose serialization
+contains a raw model output, a raw prompt, or a credential-shaped string. The end-to-end golden
+test deliberately plants a PII-leaking model output in the corpus and asserts it cannot reach the
+exported deliverable.
+
+**8. Signed, offline-verifiable artifacts.** `bundle.ts` produces a detached Ed25519 signature over
+the canonical `{documentHash, markdownHash}` payload. Verification re-derives everything with no
+network and fails closed with named reasons (document-hash mismatch, markdown tamper, payload swap,
+signature failure, unknown key id). Ed25519 is used because RFC 8032 signatures are deterministic,
+keeping bundles byte-stable. Signer and verifier are injected ports; the repo ships no key.
+
+**9. Ports all the way down.** `Gateway`, `Judge`, `GroundTruth`, `BundleSigner`/`BundleVerifier`,
+`fetchImpl`, and the clock are all injected. That is why the whole test suite runs in under three
+seconds with no model, key, or network, and why the property tests (`fast-check`) can hammer the
+certificate math directly.
 
 ## Requirements
 
 | Thing | Need | Check |
 |---|---|---|
-| Node | 24 or newer (`engines: >=24`; `.node-version` pins 24, which is what CI and every verification run used) | `node -v  # need v24 or newer` |
-| pnpm | 9 or 10 (`lockfileVersion: 9.0`) | `pnpm -v  # need 9.x or 10.x` |
+| Node | 24 or newer (`engines: >=24`; `.node-version` pins 24, which is what CI and every verification run used) | `node -v` |
+| pnpm | 9 or 10 (`lockfileVersion: 9.0`) | `pnpm -v` |
 | OS | verified on macOS 15 (Darwin 24.6.0); CI runs ubuntu-latest | n/a |
 
 If pnpm is missing: `corepack enable pnpm` (ships with Node), or `npm install -g pnpm`.
 
-**No credentials, no API keys, no network access are needed for anything in this README.** Sigil
-reads no environment variables at all (`grep -rn "process.env" src/` finds nothing and exits 1; the
-only `process` use in `src/` is `argv`, `exit`, and writes to stderr).
-Dependencies are pinned, `pnpm-lock.yaml` is committed, and every command below installs with
-`--frozen-lockfile`.
+**No credentials, no API keys, and no network access are needed for anything in this README.** Sigil
+reads no environment variables at all; the only `process` use in `src/` is `argv`, `exit`, and
+writes to stderr. Dependencies are pinned, `pnpm-lock.yaml` is committed, and every command below
+installs with `--frozen-lockfile`.
 
-The quickstart needs Node 24 specifically for one reason beyond `engines`: the library example is a
-`.ts` file run directly by Node's native type stripping.
+Node 24 specifically is needed for one reason beyond `engines`: the library example below is a `.ts`
+file run directly by Node's native type stripping.
 
 ## Install
 
@@ -97,7 +147,7 @@ devDependencies:
 + typescript-eslint 8.64.0
 + vitest 4.1.10
 
-Done in 551ms using pnpm v10.34.3
+Done in 804ms using pnpm v10.34.3
 
 $ pnpm build
 
@@ -147,7 +197,7 @@ $ cat out/report.md
 `router-policy.json`, `governance.json`), and the document hash printed above is exactly
 `sha256:91f91ffe93aca39e2b031feb3007e83104c08a8b78df8fdd77f63c068df8be42`. That hash is
 content-addressed over the whole report, so matching it means your run reproduced the audit
-byte-for-byte.
+byte for byte.
 
 If `node dist/bin.js` reports `Cannot find module`, you skipped `pnpm build`.
 
@@ -155,7 +205,7 @@ If `node dist/bin.js` reports `Cannot find module`, you skipped `pnpm build`.
 
 The numbers are the point of the exercise:
 
-- `budget` costs 10× less than `frontier`, but it failed one of its four recorded runs, so its
+- `budget` costs 10x less than `frontier`, but it failed one of its four recorded runs, so its
   Pass^3 collapses to 0.25. It is **not** recommended, and the cost delta does not rescue it.
 - `thrifty` held quality exactly, at 1/30th the cost of `frontier`. That is the recommendation.
 - ECE 0.1 is reported *before* any savings claim. If the judge were badly calibrated, you would see
@@ -208,10 +258,10 @@ explicit out-dir if you want the output somewhere else. Exit code `0` on success
 message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, in which
 case the CLI writes nothing at all).
 
-There is no `bin` field in `package.json` and the package was never published to npm, so there is
-no installable `sigil` command. Invoke the built entry point directly, as above. The usage line it
-prints on exit `2` reads `usage: audit <corpus-dir> [out-dir]`, using the tool's internal name;
-`audit` is not a command you can install either.
+The package is not on npm yet, so there is no globally installable `sigil` command; invoke the
+built entry point directly, as above. The usage line it prints on exit `2` reads
+`usage: audit <corpus-dir> [out-dir]`, using the tool's internal name. Publishing is on the
+[roadmap](#status-and-roadmap).
 
 ### The input bundle
 
@@ -230,15 +280,15 @@ system, copy `examples/credit-memo/` and replace the contents.
 
 Sigil reads **no environment variables**. All configuration is the `config.json` in the bundle:
 
-| Field | Required | Default | Effect |
-|---|---|---|---|
-| `client` | yes | n/a | Name printed in the report header |
-| `models` | yes | n/a | The candidate panel; must match the keys in `panel.json` |
-| `trialsPerTask` | yes | n/a | How many recorded trials per task to consume |
-| `passK` | yes | n/a | The `k` in Pass^k. The reliability question is "would `k` independent runs all pass?" |
-| `currentModel` | yes | n/a | The incumbent the switch recommendation is measured against |
-| `qualityFloor` | yes | n/a | Minimum measured quality a model must clear to be the primary route in the exported policy |
-| `generatedAt` | yes | n/a | ISO timestamp recorded in the report. Supplied rather than read from the clock, so runs stay byte-identical |
+| Field | Required | Effect |
+|---|---|---|
+| `client` | yes | Name printed in the report header |
+| `models` | yes | The candidate panel; must match the keys in `panel.json` |
+| `trialsPerTask` | yes | How many recorded trials per task to consume |
+| `passK` | yes | The `k` in Pass^k. The reliability question is "would `k` independent runs all pass?" |
+| `currentModel` | yes | The incumbent the switch recommendation is measured against |
+| `qualityFloor` | yes | Minimum measured quality a model must clear to be the primary route in the exported policy |
+| `generatedAt` | yes | ISO timestamp recorded in the report. Supplied rather than read from the clock, so runs stay byte-identical |
 
 ### As a library
 
@@ -309,86 +359,30 @@ policy: {"policyVersion":"neutral-route/1","qualityFloor":0.9,"routes":[{"family
 markdown lines: 17
 ```
 
-Note the `documentHash` is identical to the CLI's. Same frozen corpus plus same frozen panel
-produces the same report, whichever entry point you use.
+Note the `documentHash` is identical to the CLI's. The same frozen corpus plus the same frozen
+panel produces the same report, whichever entry point you use.
 
 To make that recommendation *defensible* rather than merely observed, pass the paired per-task
 outcomes through `verifySwitchQuality` in `stats.ts` and feed the result into
 `buildReportDocument`'s optional third `evidence` argument.
 
-## Why it is technically interesting
+## What it does not do
 
-Most eval harnesses report a number. Sigil's premise is that **an unqualified number is not
-evidence**, and nearly every design decision follows from that.
-
-**1. The measurement is itself measured.** Before any quality claim, `metrics.ts` scores the judge
-against human labels: expected calibration error (does "0.8 confidence" hold ~80% of the time?),
-Brier score, and a binned reliability table. A badly calibrated judge is surfaced, not hidden.
-
-**2. Finite-sample guarantees, not asymptotics.** `conformal.ts` computes exact one-sided
-Clopper-Pearson binomial bounds on the judge's error rate, and certifies an *abstention threshold*
-via fixed-sequence Learn-Then-Test over a data-independent confidence grid: walk thresholds from
-most to least conservative, test at each with the exact bound, stop at the first failure. The
-family-wise guarantee survives because the tests are ordered a priori. The output is a sentence you
-can file: *"on the X% of cases the judge accepts, its error rate is ≤ α with confidence 1−δ; the
-rest go to human review."* Exact bounds were chosen over Gaussian intervals because audit sample
-sizes are small. When nothing certifies, the module **refuses** rather than returning an
-uncertified threshold. Split conformal / LTT was chosen over full conformal because it needs only
-the labeled corpus that is already frozen.
-
-**3. Anytime-valid sequential monitoring.** `drift.ts` implements betting supermartingales over
-bounded [0,1] observation streams (judge-error indicators), with two constructions whose guarantees
-are deliberately never blurred: a fixed-null **e-process** where Ville's inequality bounds the
-probability of *ever* false-alarming over an unbounded horizon by α, and a changepoint
-**e-detector** (e-CUSUM style) that trades that for an average-run-length-to-false-alarm bound
-≥ 1/α in exchange for retained sensitivity to late changes. A λ-grid mixture replaces
-hyperparameter tuning (a mixture of supermartingales is a supermartingale). Classical Page CUSUM
-ships alongside as the explicitly-weaker disclosed baseline. Monitor state is plain serializable
-data, so a run can be persisted, resumed, and replayed from the observation log.
-
-**4. Headline claims are gated by evidence, and can fail.** "Switch model X to model Y, save 97% at
-equal quality" is a point comparison of aggregate means, not evidence. `stats.ts` runs an exact
-two-sided **McNemar test** on *paired* per-task outcomes and marks the switch **not defensible**
-when the cheaper candidate is significantly worse, regardless of how good the cost delta looks. "No
-detected loss" is reported as exactly that and never upgraded to "equal". Similarly, the Pass^k
-point estimate gets a certified Clopper-Pearson floor, with the i.i.d.-runs assumption stated in
-the output.
-
-**5. Ordinal vs cardinal reliability are separated.** `rank-score.ts` measures Kendall's tau-b
-between judge scores and reference quality *and* the empirical width of the score→quality residual
-interval. A judge frequently ranks well while its absolute numbers are noise; that is precisely the
-regime where "use the ordering, distrust the magnitude" is the correct guidance, and it is
-invisible to ECE alone.
-
-**6. Determinism as an architectural constraint.** Canonical JSON (sorted keys, RFC-8785-style)
-plus SHA-256 content addressing for the corpus and the report. No RNG and no wall clock anywhere in
-the analysis path; the only injected non-determinism is the report timestamp, which is recorded
-rather than read from a clock. Same frozen corpus plus same frozen panel produces a byte-identical
-report, which is what makes third-party reproduction possible at all.
-
-**7. Fail-closed data egress.** `egress.ts` refuses to release any artifact whose serialization
-contains a raw model output, a raw prompt, or a credential-shaped string. The end-to-end golden
-test deliberately plants a PII-leaking model output in the corpus and asserts it cannot reach the
-exported deliverable.
-
-**8. Signed, offline-verifiable artifacts.** `bundle.ts` produces a detached Ed25519 signature over
-the canonical `{documentHash, markdownHash}` payload. Verification re-derives everything with no
-network and fails closed with named reasons (document-hash mismatch, markdown tamper, payload swap,
-signature failure, unknown key id). Ed25519 is used because RFC 8032 signatures are deterministic,
-keeping bundles byte-stable. Signer and verifier are injected ports; the harness ships no key.
-
-**9. Ports all the way down.** `Gateway`, `Judge`, `GroundTruth`, `BundleSigner`/`BundleVerifier`,
-`fetchImpl`, and the clock are all injected. That is why the entire test suite runs in under a
-second with no model, key, or network, and why the property tests (`fast-check`) can hammer the
-certificate math directly.
+- It does not include an LLM judge. `Judge` is an interface; you supply the judge and the human
+  labels, Sigil scores them.
+- It does not call a model, hold a key, or open a network socket in the analysis path. The panel run
+  is captured upstream and supplied as data.
+- It does not route traffic, edit code, or mutate anything on your estate. Every artifact it
+  produces is derived facts only.
+- It is not a scheduler or a service. See [Status and roadmap](#status-and-roadmap).
 
 ## How it works
 
-The engine is a single pure pipeline over injected ports. In the deployment it was written for,
-everything ran inside the client's own network boundary; only derived numbers crossed out.
+The engine is a single pure pipeline over injected ports. It is designed to run inside your own
+network boundary, with only derived numbers crossing out.
 
 ```
-  client environment (their keys, their data)
+  your environment (your keys, your data)
      |
      |  Gateway adapter (OpenAI-compatible: LiteLLM proxy / OpenRouter)
      |  outputs + cost + latency
@@ -426,11 +420,11 @@ everything ran inside the client's own network boundary; only derived numbers cr
 - **Egress allowlist:** scores, calibration metrics, frontier, report, router policy. **Denylist:**
   raw outputs, prompts, keys, corpus content beyond hashes.
 
-### Deployment modes it was designed for
+### Deployment modes
 
-1. **Customer environment** (the default): engine and gateway adapter both run inside the client
+1. **In your own environment** (the default): engine and gateway adapter both run inside your
    boundary.
-2. **Hosted** (non-regulated use only).
+2. **Hosted**, where the data sensitivity allows it.
 3. **Air-gapped signed-bundle exchange:** corpus and panel results exchanged as Ed25519-signed
    bundles, verified fully offline (`bundle.ts`).
 
@@ -442,17 +436,17 @@ Single package, no workspaces. All source is in `src/`, one module per pipeline 
 |---|---|
 | `corpus.ts` | Freezes and content-addresses the task set, rubric, and human labels; derives ground truth (unlabeled outputs are conservatively not-accepted) |
 | `gateway.ts` | The `Gateway` port plus `StubGateway`, a fixture map that can vary output per trial to exercise run-to-run variance |
-| `gateway-openai-compat.ts` | Production adapter for any OpenAI-compatible chat-completions endpoint, behind a host allowlist checked before every call |
+| `gateway-openai-compat.ts` | Adapter for any OpenAI-compatible chat-completions endpoint, behind a host allowlist checked before every call |
 | `metrics.ts` | ECE, Brier, reliability table: the judge's own calibration |
 | `reliability.ts` | Unbiased combinatorial Pass^k estimator (probability a random k-subset of observed runs all pass) |
-| `frontier.ts` | Pareto frontier over quality × cost × latency; cheapest candidate at equal-or-better measured quality |
+| `frontier.ts` | Pareto frontier over quality x cost x latency; cheapest candidate at equal-or-better measured quality |
 | `conformal.ts` | Exact Clopper-Pearson bounds; certified abstention threshold via fixed-sequence Learn-Then-Test |
 | `stats.ts` | Exact McNemar gate on paired outcomes; certified Pass^k lower bound |
 | `drift.ts` | E-process (Ville), changepoint e-detector (ARL), CUSUM baseline over bounded error streams |
-| `aci.ts` | Adaptive conformal intervals (Gibbs-Candès) for forecast bands on short series; abstains when history is too short |
+| `aci.ts` | Adaptive conformal intervals (Gibbs-Candes) for forecast bands on short series; abstains when history is too short |
 | `rank-score.ts` | Kendall tau-b + cardinal interval width (ordinal vs cardinal judge reliability) |
 | `ensemble.ts` | Multi-judge majority vote (ties resolve to FAIL) with inter-judge disagreement disclosed as a first-class signal |
-| `governance.ts` | Read-only agent → task → scope least-privilege gap map |
+| `governance.ts` | Read-only agent to task to scope least-privilege gap map |
 | `report.ts` | Content-addressed report document + deterministic markdown render; certificate blocks are optional and additive |
 | `router-policy.ts` | Portable, vendor-neutral routing policy export (cheapest model clearing the quality floor, frontier as fallbacks) |
 | `bundle.ts` | Ed25519-signed report bundle + fail-closed offline verification |
@@ -466,19 +460,104 @@ Single package, no workspaces. All source is in `src/`, one module per pipeline 
 regression on a finance-shaped fixture) and `certificates.property.test.ts` (property tests over
 the certificate math via `fast-check`). `examples/credit-memo/` is the synthetic input bundle used
 by the quickstart. `fixtures/calibration-contract.golden.json` pins the calibration math against a
-sibling implementation; see [Limitations](#limitations).
+sibling implementation; see [Status and roadmap](#status-and-roadmap).
 
 ### Documented failure modes
 
-- Incomplete labels → calibration runs over the labeled subset only; the report discloses the
+- Incomplete labels: calibration runs over the labeled subset only, and the report discloses the
   sample size.
-- Nothing clears the quality floor → the router policy falls back to the highest-quality candidate,
+- Nothing clears the quality floor: the router policy falls back to the highest-quality candidate,
   never silently dropping a family, and the report flags it.
-- Judge poorly calibrated (high ECE) → surfaced before any savings claim, never hidden.
-- No abstention threshold certifies the target risk → the certificate says so explicitly ("abstain
+- Judge poorly calibrated (high ECE): surfaced before any savings claim, never hidden.
+- No abstention threshold certifies the target risk: the certificate says so explicitly ("abstain
   or collect more labels"). A wide bound from a small sample is a finding, never rounded away.
-- Candidate significantly worse on paired tasks → the switch recommendation is reported **not
+- Candidate significantly worse on paired tasks: the switch recommendation is reported **not
   defensible** regardless of the cost delta.
+
+## Status and roadmap
+
+Status values are exactly three: **Working**, **Partial**, **Planned**. Everything marked Planned is
+a real gap today, described in enough detail to pick up.
+
+### Working today
+
+| Component | Notes |
+|---|---|
+| Calibration metrics (ECE / Brier / reliability) | Covered by tests and the quickstart |
+| Risk certificates (Clopper-Pearson, Learn-Then-Test) | Property-tested in `test/certificates.property.test.ts` |
+| Pass^k reliability + certified floor | Quickstart shows it rejecting a 10x-cheaper model |
+| Pareto frontier + McNemar switch gate | Quickstart shows both |
+| Report, router policy, governance overlay | Four artifacts written by the quickstart |
+| Signed bundle + offline verification | Signer and verifier are injected ports; the repo ships no key |
+| Egress guard | Golden test plants a PII leak and asserts it cannot escape |
+| Drift monitors (e-process, e-detector, CUSUM) | Implemented and unit-tested; external cross-validation is a roadmap item below |
+| Adaptive conformal intervals (`aci.ts`) | Abstains when the history is too short |
+| CLI over a captured bundle | `node dist/bin.js <bundle-dir> [out-dir]` |
+
+### Partial
+
+**Live gateway adapter (`src/gateway-openai-compat.ts`).** Fully implemented and tested against an
+injected `fetchImpl`, including the host allowlist, key scrubbing, and the throw-on-missing-cost
+rule. It has never been run against a live LiteLLM or OpenRouter endpoint from this repo, so the
+wire-level details (header names, error shapes, cost field placement per provider) are unverified
+against a real server. **Good first contribution:** run it against your own endpoint, and send a
+recorded-response fixture test for whatever needed fixing. The seam is `OpenAiCompatGatewayOptions`
+in that module.
+
+### Planned
+
+**Continuous / trend mode.** `drift.ts` and `aci.ts` are the machinery, but there is no scheduler,
+persistence layer, or service around them, so today drift monitoring is a library you drive
+yourself. Monitor state is deliberately plain serializable data: `EProcessState` and `EDetectorState`
+in `src/drift.ts` (and `AciState` in `src/aci.ts`) are values in and values out, with
+`initEProcess` / `updateEProcess` and `initEDetector` / `updateEDetector` as the whole interface.
+What is missing is the layer above: persist state between runs, replay an observation log,
+and emit a trend report across a series of audits rather than a single point-in-time one.
+
+**External cross-validation of `drift.ts`.** The e-process and e-detector guarantees are argued in
+the module docs and property-tested internally, but never checked against an external reference
+implementation. The concrete task: generate golden fixtures from CRAN's `stcpR6` on the same
+observation streams and assert agreement to within tolerance, the same way
+`fixtures/calibration-contract.golden.json` pins the calibration math. This is the single most
+valuable contribution anyone could make to this repo, because it converts an internal argument into
+external corroboration.
+
+**Live upstream calibration import.** `metrics.ts` deliberately *mirrors* the canonical ECE/Brier
+math rather than importing it, pinned by `fixtures/calibration-contract.golden.json` (generated from
+`@engine/eval` in `apatureai/judgment-engine`). If the contract test and the upstream ever disagree,
+one side changed the math unilaterally, which is the failure the contract exists to catch. The
+fixture is a frozen manual copy today, not a live check; regenerating it on a cadence, or in CI,
+is open.
+
+**Anchor-set drift attribution (system vs judge).** When drift fires, it does not tell you whether
+the system got worse or the judge did. The design sketch is a held-out anchor set with a
+rotate-with-overlap refresh policy, sitting on top of `drift.ts`. Nothing is implemented.
+
+**npm publication.** The package is `private: true` with no `bin` field, so there is no
+`npm i sigil` and no installable command. Publishing needs a name decision, a `bin` entry, and a
+release workflow.
+
+### Out of scope on purpose
+
+- **An LLM judge.** `Judge` is an interface. Sigil scores whatever judge you hand it, and the same
+  is true of ground truth: human labels, supplied by you. Bundling a judge would make the harness
+  non-neutral, which is the one thing it must not be.
+
+### Stated preconditions
+
+These are properties of the statistics, not bugs, and each is stated in the output as well as here:
+
+- The abstention certificate assumes exchangeability between the calibration and deployment draws.
+  Drift breaks that assumption, which is why re-certification is meant to be a recurring cadence.
+- `certifiedPassKLowerBound` assumes i.i.d. runs.
+- The ACI guarantee is long-run average coverage; locally it can under-cover, and the implementation
+  clamps the adaptive level to [0.001, 0.999] to keep intervals finite, trading a corner of the
+  asymptotic argument for bounded artifacts.
+- Small samples give wide bounds, and that is the intended behavior. A wide interval is reported as
+  a finding, and when nothing certifies at the requested level the certificate says so explicitly
+  instead of returning a number.
+- The regulatory framing in some module docs (SR 11-7, SR 26-2) explains *why* the code is shaped
+  the way it is. It is not legal advice and not a compliance claim.
 
 ## Development
 
@@ -491,7 +570,8 @@ pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
 Those five commands, in that order, are exactly what CI runs (`.github/workflows/ci.yml`). All five
-pass on a clean checkout, verified 2026-08-09 on Node 24.14.0 with pnpm 10.34.3.
+pass on a clean checkout, verified 2026-08-09 on Node 24.14.0 with pnpm 10.34.3: 20 test files, 160
+tests, 2.69s.
 
 Run a single test file:
 
@@ -505,84 +585,28 @@ the tests enforce it.** No test may call a real model, key, or network. The live
 and no RNG in the analysis path; `test/golden-fs.test.ts` and `test/canonical.test.ts` will catch
 you. And do not widen what crosses the egress line.
 
-## Limitations
-
-Everything below is a boundary of the contract, stated so you can decide whether this repo is
-useful to you. Status values are exactly three: **Working**, **Partial**, **Not implemented**.
-
-| Component | Status | Notes |
-|---|---|---|
-| Calibration metrics (ECE / Brier / reliability) | Working | Covered by tests and the quickstart |
-| Risk certificates (Clopper-Pearson, Learn-Then-Test) | Working | Property-tested in `test/certificates.property.test.ts` |
-| Pass^k reliability + certified floor | Working | Quickstart shows it rejecting a 10×-cheaper model |
-| Pareto frontier + McNemar switch gate | Working | Quickstart shows both |
-| Report, router policy, governance overlay | Working | Four artifacts written by the quickstart |
-| Signed bundle + offline verification | Working | Signer/verifier are injected ports; the repo ships no key |
-| Egress guard | Working | Golden test plants a PII leak and asserts it cannot escape |
-| Drift monitors (e-process, e-detector, CUSUM) | Working | Never cross-validated against an external reference; see below |
-| Adaptive conformal intervals (`aci.ts`) | Working | Abstains when the history is too short |
-| CLI over a captured bundle | Working | `node dist/bin.js <bundle-dir> [out-dir]` |
-| Live gateway adapter (`gateway-openai-compat.ts`) | Partial | Fully implemented and tested against an injected `fetchImpl`; never exercised against a live LiteLLM or OpenRouter endpoint from this repo |
-| Continuous / trend mode | Not implemented | `drift.ts` and `aci.ts` are the machinery; there is no scheduler, persistence layer, or service. Monitor state is plain serializable data: the seam is `EProcess`/`EDetector` state in `src/drift.ts`, and you serialize it |
-| Upstream calibration import | Not implemented | `metrics.ts` deliberately *mirrors* the canonical ECE/Brier math instead of importing it, pinned by `fixtures/calibration-contract.golden.json`. If the contract test and the upstream ever disagree, one side changed the math unilaterally, which is the failure the contract exists to catch. The fixture is a frozen manual copy, not a live check |
-| External cross-validation of `drift.ts` | Not implemented | Checking it against CRAN `stcpR6` outputs as golden fixtures was open at archive time. The guarantees are argued in the module docs and property-tested internally, not externally corroborated |
-| Anchor-set drift attribution (system vs judge) | Not implemented | Out of scope; it would sit on top of `drift.ts` with a rotate-with-overlap anchor refresh policy |
-| An LLM judge | Out of scope | `Judge` is an interface. Sigil scores whatever judge you hand it, and the same is true of ground truth: human labels, supplied |
-| An installable `sigil` command | Out of scope | The package is `private: true` and was never published to npm. Run `node dist/bin.js` |
-
-Further caveats:
-
-- **Statistical validity has stated preconditions.** The abstention certificate assumes
-  exchangeability between the calibration and deployment draws. Drift breaks that assumption,
-  which is why re-certification was designed as a recurring cadence.
-  `certifiedPassKLowerBound` assumes i.i.d. runs. The ACI guarantee is long-run average coverage; locally it can under-cover, and the
-  implementation clamps the adaptive level to [0.001, 0.999] to keep intervals finite, trading a
-  corner of the asymptotic argument for bounded artifacts. Each of these is stated in the output,
-  not just here.
-- **Small samples give wide bounds, and that is the intended behavior.** A wide interval is
-  reported as a finding. When nothing certifies at the requested level, the certificate says so
-  explicitly instead of returning a number.
-- **The commercial plan behind this code was never executed.** No engagement ever ran. The
-  regulatory framing that survives in the module docs (SR 11-7 / SR 26-2) explains *why* the code
-  is shaped the way it is; it is not legal advice or a compliance claim.
+[CONTRIBUTING.md](CONTRIBUTING.md) has the full setup, conventions, and review process.
 
 ## Prior work
 
 The statistical machinery follows published lines rather than inventing any: split conformal
 prediction and Learn-Then-Test risk control (Angelopoulos, Bates et al.); selective classification
-with a reject option (Geifman & El-Yaniv); betting supermartingales and e-detectors (Waudby-Smith &
-Ramdas; Shin, Ramdas & Rinaldo, arXiv:2203.03532); adaptive conformal inference under distribution
-shift (Gibbs & Candès, NeurIPS 2021); Page's CUSUM; the exact McNemar test; Clopper-Pearson
-intervals. The engineering contribution is putting them behind one deterministic, reproducible,
-fail-closed audit contract, not the estimators themselves.
-
-## Where this sat in the Apature stack
-
-Apature was a GitHub-native AI design reviewer: it screenshotted a pull request's preview deploy,
-critiqued the rendered UI against the repo's own design system with a vision-language model, and
-posted an annotated review. Its boundary was that it judged and verified but never edited code or
-drove the UI.
-
-Sigil is the odd one out. It was built as a deliberately standalone, neutral measurement engine and
-imports nothing from any sibling repo. The whole argument for it was that an audit cannot be
-independent if the auditor also sells you the thing being audited. Its only connection to the rest
-of the stack is a *contract*, not a dependency: the ECE/Brier/reliability math in `metrics.ts`
-mirrors the canonical implementation that lived in a sibling repo, `judgment-engine`, pinned by a
-copied golden fixture so the two can never silently diverge. The other components released
-alongside it (`gate`, `ui-graph`, `ui-dna`, `mcp-review`) are separate repositories, each with its
-own README.
+with a reject option (Geifman and El-Yaniv); betting supermartingales and e-detectors (Waudby-Smith
+and Ramdas; Shin, Ramdas and Rinaldo, arXiv:2203.03532); adaptive conformal inference under
+distribution shift (Gibbs and Candes, NeurIPS 2021); Page's CUSUM; the exact McNemar test;
+Clopper-Pearson intervals. The contribution here is putting them behind one deterministic,
+reproducible, fail-closed audit contract in TypeScript, not the estimators themselves.
 
 ## Contributing
 
-This repository is archived. Pull requests are not accepted and issues are not monitored. Forking
-is the intended path: the MIT License lets you take this code, rename it, change it, and ship it
-without asking. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Contributions are welcome, and the roadmap above is the shortlist. Issues and pull requests are
+read. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, conventions, and how review works.
 
 ## Security
 
-No credentials, keys, or secrets are stored in this repository, and the code opens no sockets. The
-project is archived, so there is no security-response process; report handling and the threat
-boundary are described in [SECURITY.md](SECURITY.md).
+No credentials, keys, or secrets are stored in this repository, and the analysis path opens no
+sockets. To report a vulnerability, use GitHub's private vulnerability reporting on this repository.
+[SECURITY.md](SECURITY.md) has the policy and the threat boundary.
 
 ## License
 

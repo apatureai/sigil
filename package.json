@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "Neutral AI quality & efficiency audit harness: frozen corpus -> captured panel run -> calibrated-judge metrics (ECE/Brier/reliability) -> Pass^k reliability -> Pareto cost-at-equal-quality frontier, with finite-sample risk certificates, anytime-valid drift monitoring, and signed reproducible reports. Fixture-driven; never calls a real model/key/network.",
+  "description": "Error bars for LLM-as-judge evals: calibration (ECE/Brier/reliability), finite-sample risk certificates (Clopper-Pearson, Learn-Then-Test), Pass^k reliability, anytime-valid drift monitoring, and a cost-at-equal-quality frontier gated by an exact McNemar test. Dependency-free TypeScript; the analysis path calls no model, holds no key, and opens no socket.",
   "author": "Aditya Prathapa",
   "repository": {
     "type": "git",
