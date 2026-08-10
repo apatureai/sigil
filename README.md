@@ -524,7 +524,7 @@ external corroboration.
 
 **Live upstream calibration import.** `metrics.ts` deliberately *mirrors* the canonical ECE/Brier
 math rather than importing it, pinned by `fixtures/calibration-contract.golden.json` (generated from
-`@engine/eval` in `apatureai/judgment-engine`). If the contract test and the upstream ever disagree,
+`@engine/eval` in `apatureai/verdict`). If the contract test and the upstream ever disagree,
 one side changed the math unilaterally, which is the failure the contract exists to catch. The
 fixture is a frozen manual copy today, not a live check; regenerating it on a cadence, or in CI,
 is open.

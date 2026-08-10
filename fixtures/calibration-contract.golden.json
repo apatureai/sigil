@@ -1,5 +1,5 @@
 {
-  "$comment": "Calibration contract vectors. The canonical ECE/Brier implementation is @engine/eval in apatureai/judgment-engine; sigil mirrors it and this frozen snapshot pins the two together. Regenerating requires that upstream repo (pnpm --filter @engine/eval gen:calibration-contract); consumed here by test/calibration-contract.test.ts.",
+  "$comment": "Calibration contract vectors. The canonical ECE/Brier implementation is @engine/eval in apatureai/verdict; sigil mirrors it and this frozen snapshot pins the two together. Regenerating requires that upstream repo (pnpm --filter @engine/eval gen:calibration-contract); consumed here by test/calibration-contract.test.ts.",
   "vectors": [
     {
       "name": "uniform-200",

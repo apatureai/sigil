@@ -6,7 +6,7 @@ import type { JudgePrediction } from "../src/metrics.js";
 
 /**
  * Calibration contract: the canonical ECE/Brier implementation lives upstream
- * in apatureai/judgment-engine (`@engine/eval`); sigil MIRRORS it, with no
+ * in apatureai/verdict (`@engine/eval`); sigil MIRRORS it, with no
  * dependency in either direction, and this test pins the mirror to a frozen
  * golden fixture copied from that upstream generator. The vectors include
  * exact bin-edge confidences, the FP-sensitive inputs where a
