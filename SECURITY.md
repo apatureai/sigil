@@ -5,7 +5,7 @@
 | Version | Supported |
 |---|---|
 | `main` | Yes. Fixes land on `main` |
-| Tagged releases | None yet; the package is not published to npm. Track `main` |
+| Tagged releases | `v0.1.0` is the current release. Not yet published to npm. Track `main` |
 
 Sigil has **zero runtime dependencies**: every import outside the repo is a Node built-in
 (`node:crypto`, `node:fs`, `node:path`). The supply-chain surface is the dev toolchain only
