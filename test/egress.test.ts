@@ -13,8 +13,8 @@ import {
 } from "../src/index.js";
 
 const gateway = new StubGateway({
-  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["Customer SSN is 123-45-6789; approve the loan"] } },
-  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["Customer SSN is 123-45-6789; approve the loan"] } },
+  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["Customer SSN is 123-45-6789; approve the loan", "Customer SSN is 123-45-6789; approve the loan"] } },
+  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["Customer SSN is 123-45-6789; approve the loan", "Customer SSN is 123-45-6789; approve the loan"] } },
 });
 const groundTruth: GroundTruth = { accept: () => true };
 const judge: Judge = { judge: () => ({ pass: true, confidence: 0.9 }) };

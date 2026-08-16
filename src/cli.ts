@@ -64,6 +64,25 @@ export async function runBundleAudit(bundle: AuditBundle): Promise<AuditArtifact
     currentModel: bundle.config.currentModel,
   });
 
+  // Fail closed on evidence, exactly as the egress guard fails closed on
+  // content. The CLI's output is the signable artifact, so a configuration that
+  // asks for more trials than were captured is a defect in the bundle, not a
+  // gap to paper over: the missing trials are obtained by re-running the panel,
+  // never by repeating a recorded output.
+  if (!report.trialCoverage.complete) {
+    const detail = report.trialCoverage.shortfalls
+      .map((s) => `${s.model}/${s.taskId} has ${s.recorded}`)
+      .join(", ");
+    throw new Error(
+      `bundle asks for trialsPerTask ${report.trialCoverage.requestedTrialsPerTask} but the captured panel ` +
+        `holds fewer for ${report.trialCoverage.shortfalls.length} (model, task) pair` +
+        `${report.trialCoverage.shortfalls.length === 1 ? "" : "s"}: ${detail}. ` +
+        "Repeating a recorded output would inflate the sample size and Pass^k. " +
+        `Set trialsPerTask to ${Math.min(...report.trialCoverage.shortfalls.map((s) => s.recorded))} ` +
+        "or capture the missing trials.",
+    );
+  }
+
   const doc = buildReportDocument(report, {
     client: bundle.config.client,
     corpusHash: corpus.contentHash,
@@ -118,7 +137,15 @@ export async function main(argv: readonly string[]): Promise<number> {
     return 2;
   }
   const outDir = argv[1] ?? path.join(dir, "out");
-  const artifacts = await runBundleAudit(loadBundle(dir));
+  let artifacts: AuditArtifacts;
+  try {
+    artifacts = await runBundleAudit(loadBundle(dir));
+  } catch (error) {
+    // Nothing is written on refusal: a partially written out-dir would be a
+    // report a reader could pick up without the reason it was rejected.
+    process.stderr.write(`audit refused: ${error instanceof Error ? error.message : String(error)}\n`);
+    return 1;
+  }
   writeArtifacts(outDir, artifacts);
   process.stderr.write(`wrote report.{json,md}, router-policy.json, governance.json to ${outDir}\n`);
   return 0;

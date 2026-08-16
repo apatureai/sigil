@@ -257,8 +257,8 @@ node dist/bin.js <bundle-dir> [out-dir]
 
 `out-dir` defaults to `<bundle-dir>/out`, which writes inside the bundle directory, so pass an
 explicit out-dir if you want the output somewhere else. Exit code `0` on success, `2` with a usage
-message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, in which
-case the CLI writes nothing at all).
+message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, or a
+bundle asking for more trials than it captured, in which case the CLI writes nothing at all).
 
 The package is not on npm yet, so there is no globally installable `sigil` command; invoke the
 built entry point directly, as above. The usage line it prints on exit `2` reads
@@ -274,7 +274,7 @@ system, copy `examples/credit-memo/` and replace the contents.
 |---|---|---|
 | `config.json` | yes | Run configuration; see the table below |
 | `corpus.json` | yes | `{ rubric, tasks[] }`; every task carries human `labels` of `{ output, accept }`. This is the frozen, content-addressed benchmark set, and the ground truth is derived from it (an unlabeled output is conservatively treated as not-accepted) |
-| `panel.json` | yes | The captured panel run, per model: `{ costUsd, latencyMs, outputs: { [taskId]: string[] } }`. One array entry per trial, so run-to-run variance is expressible |
+| `panel.json` | yes | The captured panel run, per model: `{ costUsd, latencyMs, outputs: { [taskId]: string[] } }`. One array entry per **distinct recorded trial**, so run-to-run variance is expressible. Every `(model, taskId)` must hold at least `trialsPerTask` entries; see below |
 | `judge.json` | yes | Judge verdicts keyed by raw output string: `{ pass, confidence }`. An output with no verdict is treated as `{ pass: false, confidence: 0.5 }` |
 | `governance.json` | no | `{ agents[], requirements[] }` for the least-privilege overlay. Omit it and the overlay returns `[]` |
 
@@ -286,11 +286,48 @@ Sigil reads **no environment variables**. All configuration is the `config.json`
 |---|---|---|
 | `client` | yes | Name printed in the report header |
 | `models` | yes | The candidate panel; must match the keys in `panel.json` |
-| `trialsPerTask` | yes | How many recorded trials per task to consume |
+| `trialsPerTask` | yes | How many recorded trials per task to consume. It may not exceed the shortest series in `panel.json`; the CLI refuses the bundle rather than repeat a recorded output (see [Asking for more trials than were captured](#asking-for-more-trials-than-were-captured)) |
 | `passK` | yes | The `k` in Pass^k. The reliability question is "would `k` independent runs all pass?" |
 | `currentModel` | yes | The incumbent the switch recommendation is measured against |
 | `qualityFloor` | yes | Minimum measured quality a model must clear to be the primary route in the exported policy |
 | `generatedAt` | yes | ISO timestamp recorded in the report. Supplied rather than read from the clock, so runs stay byte-identical |
+
+### Asking for more trials than were captured
+
+`trialsPerTask` names how many recorded trials to consume. It used to be allowed to exceed what
+`panel.json` holds: the stub gateway replayed the last recorded output for every extra trial and the
+harness counted each replay as a sample. On the shipped `examples/credit-memo` bundle, raising
+`trialsPerTask` from 4 to 8 turned 12 real judgements into `sample: 24` and lifted the budget
+model's worst-case Pass^3 from 0.25 to 0.625, at exit 0, with no warning, on a document that was
+content-addressed and signable.
+
+A replay is not evidence. It is the same recorded string handed back again, so it adds no
+information about anything, and Pass^k in particular reads agreement between copies of one output
+as consistency across runs. Both halves of the path now refuse it:
+
+- **The CLI refuses the bundle.** `runBundleAudit` throws before building any document, naming each
+  short `(model, task)` pair and the `trialsPerTask` value that would be honest. The process exits
+  `1` and writes nothing, so no partial report can be picked up without the reason it was rejected.
+  The missing trials are obtained by re-running the panel, never by repeating a recorded output.
+
+  ```
+  $ node dist/bin.js ./bundle-asking-for-8
+  audit refused: bundle asks for trialsPerTask 8 but the captured panel holds fewer for 3
+  (model, task) pairs: budget/memo-1 has 4, frontier/memo-1 has 4, thrifty/memo-1 has 4.
+  Repeating a recorded output would inflate the sample size and Pass^k. Set trialsPerTask to 4
+  or capture the missing trials.
+  ```
+
+- **The library counts only real trials and says what it dropped.** `runAudit` is usable with any
+  gateway, so it degrades instead of throwing: a response flagged `replayed` is excluded from the
+  judge's sample and from Pass^k, and `report.trialCoverage` records `realTrials`, `replayedTrials`
+  and a per-`(model, task)` shortfall list. `buildReportDocument` carries that into the document as
+  `trialCoverage` **only when the evidence fell short**, and `renderMarkdown` prints
+  `INCOMPLETE EVIDENCE` next to the sample size plus a `## Trial coverage (INCOMPLETE)` section. A
+  complete audit's document, and therefore its hash, is unchanged.
+
+A custom `Gateway` should set `replayed: true` on any response that is not a distinct observation.
+Omitting the field asserts that it is one.
 
 ### As a library
 
@@ -475,6 +512,9 @@ sibling implementation; see [Status and roadmap](#status-and-roadmap).
   or collect more labels"). A wide bound from a small sample is a finding, never rounded away.
 - Candidate significantly worse on paired tasks: the switch recommendation is reported **not
   defensible** regardless of the cost delta.
+- Fewer recorded trials than `trialsPerTask` asks for: the CLI refuses the bundle and writes
+  nothing; through the library, replayed responses are excluded from the sample and from Pass^k and
+  the shortfall is stated in the report. The sample count is never padded to the requested number.
 
 ## Status and roadmap
 

@@ -47,7 +47,7 @@ describe("JudgeEnsemble", () => {
 
   it("drops into runAudit as an ordinary judge and exposes disagreement afterward", async () => {
     const gateway = new StubGateway({
-      m: { costUsd: 0.01, latencyMs: 100, outputs: { t1: ["ok"], t2: ["good"] } },
+      m: { costUsd: 0.01, latencyMs: 100, outputs: { t1: ["ok", "ok"], t2: ["good", "good"] } },
     });
     const groundTruth: GroundTruth = { accept: (_t, o) => o === "good" || o === "ok" };
     const ensemble = new JudgeEnsemble(panel(strict, lenient, alwaysPass));

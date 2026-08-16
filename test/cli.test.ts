@@ -15,8 +15,8 @@ function bundle(): AuditBundle {
       tasks: [{ taskId: "memo-1", family: "credit_memo", input: "Summarize creditworthiness for applicant 4821", labels: [{ output: RAW_MID, accept: true }, { output: RAW_BAD, accept: false }] }],
     },
     panel: {
-      frontier: { costUsd: 0.03, latencyMs: 1400, outputs: { "memo-1": [RAW_MID] } },
-      budget: { costUsd: 0.003, latencyMs: 400, outputs: { "memo-1": [RAW_MID] } },
+      frontier: { costUsd: 0.03, latencyMs: 1400, outputs: { "memo-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID] } },
+      budget: { costUsd: 0.003, latencyMs: 400, outputs: { "memo-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID] } },
     },
     judgeVerdicts: { [RAW_MID]: { pass: true, confidence: 0.9 }, [RAW_BAD]: { pass: false, confidence: 0.9 } },
     governance: { agents: [{ agentId: "credit-bot", grantedScopes: ["read:applications", "read:ssn"], tasks: ["credit_memo"] }], requirements: [{ family: "credit_memo", requiredScopes: ["read:applications"] }] },

@@ -12,9 +12,9 @@ import {
 } from "../src/index.js";
 
 const gateway = new StubGateway({
-  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["good"], t2: ["good"] } },
-  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good"], t2: ["good"] } },
-  flaky: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good", "bad", "good", "bad"], t2: ["good"] } },
+  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["good", "good", "good", "good"], t2: ["good", "good", "good", "good"] } },
+  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good", "good", "good", "good"], t2: ["good", "good", "good", "good"] } },
+  flaky: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good", "bad", "good", "bad"], t2: ["good", "good", "good", "good"] } },
 });
 const groundTruth: GroundTruth = { accept: (_t, o) => o === "good" };
 const judge: Judge = { judge: (_t, o) => ({ pass: o === "good", confidence: 0.9 }) };

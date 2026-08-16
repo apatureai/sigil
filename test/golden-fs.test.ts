@@ -54,9 +54,9 @@ const corpusSpec: CorpusSpec = {
 };
 
 const gateway = new StubGateway({
-  frontier: { costUsd: 0.03, latencyMs: 1400, outputs: { "memo-1": [RAW_MID], "sar-1": [RAW_MID] } },
-  mid: { costUsd: 0.008, latencyMs: 700, outputs: { "memo-1": [RAW_MID], "sar-1": [RAW_MID] } },
-  budget: { costUsd: 0.002, latencyMs: 400, outputs: { "memo-1": [RAW_BUDGET_BAD], "sar-1": [RAW_BUDGET_GOOD, RAW_BUDGET_BAD, RAW_BUDGET_GOOD, RAW_BUDGET_BAD] } },
+  frontier: { costUsd: 0.03, latencyMs: 1400, outputs: { "memo-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID], "sar-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID] } },
+  mid: { costUsd: 0.008, latencyMs: 700, outputs: { "memo-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID], "sar-1": [RAW_MID, RAW_MID, RAW_MID, RAW_MID] } },
+  budget: { costUsd: 0.002, latencyMs: 400, outputs: { "memo-1": [RAW_BUDGET_BAD, RAW_BUDGET_BAD, RAW_BUDGET_BAD, RAW_BUDGET_BAD], "sar-1": [RAW_BUDGET_GOOD, RAW_BUDGET_BAD, RAW_BUDGET_GOOD, RAW_BUDGET_BAD] } },
 });
 
 // A well-calibrated judge: pass iff the output is a labeled-acceptable one.

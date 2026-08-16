@@ -20,6 +20,17 @@ export interface GatewayResponse {
   output: string;
   costUsd: number;
   latencyMs: number;
+  /**
+   * True when this response is NOT a distinct recorded trial but a repeat of an
+   * earlier one, because more trials were requested than the capture holds.
+   *
+   * A replay is not evidence. It carries no run-to-run information, so counting
+   * it as a sample inflates every statistic derived from it: the judge's sample
+   * size, and Pass^k, which reads agreement between copies of one output as
+   * consistency across runs. `runAudit` excludes replays from both and reports
+   * them; omit the field (or set it false) for a real trial.
+   */
+  replayed?: boolean;
 }
 
 export interface Gateway {
@@ -30,7 +41,11 @@ export interface Gateway {
 export interface StubModelFixture {
   costUsd: number;
   latencyMs: number;
-  /** Output per (taskId, trial). Falls back to the last entry for higher trials. */
+  /**
+   * Output per (taskId, trial). A trial index past the end of the series repeats
+   * the last entry and is flagged `replayed`, so no consumer can mistake the
+   * repeat for a fresh observation of the model.
+   */
   outputs: Record<string, string[]>;
 }
 
@@ -45,7 +60,8 @@ export class StubGateway implements Gateway {
     if (series === undefined || series.length === 0) {
       throw new Error(`no stub output for ${request.model}/${request.taskId}`);
     }
+    const replayed = request.trial >= series.length;
     const output = series[Math.min(request.trial, series.length - 1)]!;
-    return { output, costUsd: model.costUsd, latencyMs: model.latencyMs };
+    return { output, costUsd: model.costUsd, latencyMs: model.latencyMs, ...(replayed ? { replayed } : {}) };
   }
 }

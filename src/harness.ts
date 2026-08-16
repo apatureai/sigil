@@ -66,10 +66,44 @@ export interface PassKRow extends PassKResult {
   taskId: string;
 }
 
+/** One (model, task) whose capture held fewer trials than the audit asked for. */
+export interface TrialShortfall {
+  model: string;
+  taskId: string;
+  /** Trials the audit configuration asked for. */
+  requested: number;
+  /** Distinct recorded trials the capture actually held. */
+  recorded: number;
+  /** `requested - recorded`: responses the gateway repeated rather than recorded. */
+  replayed: number;
+}
+
+/**
+ * Whether every requested trial was backed by a distinct recorded one.
+ *
+ * `complete: false` means the audit consumed fewer samples than its
+ * configuration named, because the rest did not exist. That is a statement about
+ * the EVIDENCE, so it travels with the report rather than being resolved by
+ * padding: for a tool whose output is calibrated confidence, an inflated sample
+ * count is the worst possible failure.
+ */
+export interface TrialCoverage {
+  requestedTrialsPerTask: number;
+  complete: boolean;
+  /** Distinct recorded trials actually judged, across every (model, task). */
+  realTrials: number;
+  /** Repeats the gateway offered and the audit refused to count. */
+  replayedTrials: number;
+  /** Every shortfall, sorted by model then task. Empty when `complete`. */
+  shortfalls: TrialShortfall[];
+}
+
 export interface AuditReport {
   judgeReliability: JudgeReliability;
   families: FamilyFrontier[];
   passK: PassKRow[];
+  /** What the numbers above are actually made of. Never omitted. */
+  trialCoverage: TrialCoverage;
 }
 
 interface ModelTaskStats {
@@ -88,19 +122,42 @@ export async function runAudit(input: AuditInput): Promise<AuditReport> {
 
   const tasksSorted = [...input.corpus.tasks].sort((a, b) => a.taskId.localeCompare(b.taskId));
   const modelsSorted = [...input.models].sort();
+  const shortfalls: TrialShortfall[] = [];
+  let realTrials = 0;
+  let replayedTrials = 0;
 
   for (const model of modelsSorted) {
     for (const task of tasksSorted) {
       const stats: ModelTaskStats = { passes: [], costUsd: 0, latencyMs: 0 };
+      let replayed = 0;
       for (let trial = 0; trial < input.trialsPerTask; trial++) {
         const res = await input.gateway.run({ model, taskId: task.taskId, trial, input: task.input });
+        stats.costUsd = res.costUsd;
+        stats.latencyMs = res.latencyMs;
+        // A replay is the same recorded output handed back again. Judging it
+        // would produce a duplicate prediction and a duplicate "run", which is
+        // how `sample: 24` came out of 12 judgements and how Pass^3 rose from
+        // 0.25 to 0.625 without a single new observation.
+        if (res.replayed === true) {
+          replayed += 1;
+          continue;
+        }
         const verdict = input.judge.judge(task.taskId, res.output);
         const truth = input.groundTruth.accept(task.taskId, res.output);
         // Calibration: was the judge's verdict actually correct vs ground truth?
         predictions.push({ confidence: verdict.confidence, correct: verdict.pass === truth });
         stats.passes.push(verdict.pass);
-        stats.costUsd = res.costUsd;
-        stats.latencyMs = res.latencyMs;
+      }
+      realTrials += stats.passes.length;
+      replayedTrials += replayed;
+      if (replayed > 0) {
+        shortfalls.push({
+          model,
+          taskId: task.taskId,
+          requested: input.trialsPerTask,
+          recorded: stats.passes.length,
+          replayed,
+        });
       }
 
       const passRate = stats.passes.filter(Boolean).length / Math.max(1, stats.passes.length);
@@ -138,5 +195,12 @@ export async function runAudit(input: AuditInput): Promise<AuditReport> {
     judgeReliability: judgeReliability(predictions),
     families,
     passK: passKRows.sort((a, b) => a.model.localeCompare(b.model) || a.taskId.localeCompare(b.taskId)),
+    trialCoverage: {
+      requestedTrialsPerTask: input.trialsPerTask,
+      complete: shortfalls.length === 0,
+      realTrials,
+      replayedTrials,
+      shortfalls: shortfalls.sort((a, b) => a.model.localeCompare(b.model) || a.taskId.localeCompare(b.taskId)),
+    },
   };
 }

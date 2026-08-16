@@ -77,6 +77,22 @@ export interface AuditReportDocument {
     delta: number;
     passKLower: number;
   }>;
+  /**
+   * Present ONLY when the capture held fewer trials than the audit asked for.
+   * Its absence is the claim that every requested trial was a distinct recorded
+   * one, so a complete audit's document (and its hash) is unchanged.
+   *
+   * The counts above already exclude the repeats; this block names them, so a
+   * reader of the signed artifact can see that the configuration asked for more
+   * evidence than exists rather than inferring it from a sample size.
+   */
+  trialCoverage?: {
+    requestedTrialsPerTask: number;
+    realTrials: number;
+    replayedTrials: number;
+    shortfalls: Array<{ model: string; taskId: string; requested: number; recorded: number; replayed: number }>;
+    statement: string;
+  };
   documentHash: string;
 }
 
@@ -113,6 +129,27 @@ export function buildReportDocument(
     findings,
     reliabilityExposure,
   };
+
+  // Carried only when the evidence fell short, so a complete audit's document is
+  // byte-identical to what it was before this block existed.
+  const coverage = report.trialCoverage;
+  if (coverage !== undefined && !coverage.complete) {
+    const worst = [...coverage.shortfalls].sort((a, b) => a.recorded - b.recorded)[0];
+    body.trialCoverage = {
+      requestedTrialsPerTask: coverage.requestedTrialsPerTask,
+      realTrials: coverage.realTrials,
+      replayedTrials: coverage.replayedTrials,
+      shortfalls: coverage.shortfalls.map((s) => ({ ...s })),
+      statement:
+        `Configuration asked for ${coverage.requestedTrialsPerTask} trials per task, but the capture ` +
+        `held fewer for ${coverage.shortfalls.length} (model, task) pair${coverage.shortfalls.length === 1 ? "" : "s"}` +
+        `${worst === undefined ? "" : ` (as few as ${worst.recorded})`}. ` +
+        `Every number in this report is computed from the ${coverage.realTrials} distinct recorded trial` +
+        `${coverage.realTrials === 1 ? "" : "s"} only; ${coverage.replayedTrials} repeated response` +
+        `${coverage.replayedTrials === 1 ? " was" : "s were"} excluded rather than counted as evidence. ` +
+        "Re-run the panel to obtain the missing trials before treating the requested count as achieved.",
+    };
+  }
 
   // Evidence blocks are ADDITIVE: absent evidence leaves the document (and its
   // hash) byte-identical to the pre-evidence format. The document restates
@@ -169,6 +206,13 @@ export function renderMarkdown(doc: AuditReportDocument): string {
   lines.push("");
   lines.push(`## Judge reliability (the number's own error bars)`);
   lines.push(`- ECE: ${doc.judge.ece} · Brier: ${doc.judge.brier} · sample: ${doc.judge.sampleSize}`);
+  if (doc.trialCoverage !== undefined) {
+    lines.push(
+      `- INCOMPLETE EVIDENCE: ${doc.trialCoverage.replayedTrials} requested trial` +
+        `${doc.trialCoverage.replayedTrials === 1 ? " was" : "s were"} not recorded and ` +
+        `${doc.trialCoverage.replayedTrials === 1 ? "is" : "are"} excluded from this sample (see Trial coverage).`,
+    );
+  }
   lines.push("");
   lines.push(`## Efficiency frontier — equal-quality savings`);
   for (const f of doc.findings) {
@@ -200,6 +244,14 @@ export function renderMarkdown(doc: AuditReportDocument): string {
     lines.push(`## Certified reliability floors`);
     for (const r of doc.certifiedReliability) {
       lines.push(`- ${r.model} · ${r.family}: Pass^${r.k} ≥ ${(r.passKLower * 100).toFixed(1)}% at confidence ${((1 - r.delta) * 100).toFixed(0)}%`);
+    }
+  }
+  if (doc.trialCoverage !== undefined) {
+    lines.push("");
+    lines.push(`## Trial coverage (INCOMPLETE)`);
+    lines.push(`- ${doc.trialCoverage.statement}`);
+    for (const s of doc.trialCoverage.shortfalls) {
+      lines.push(`- ${s.model} · ${s.taskId}: ${s.recorded} of ${s.requested} trials recorded, ${s.replayed} replayed and not counted`);
     }
   }
   return lines.join("\n");

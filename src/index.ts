@@ -43,6 +43,8 @@ export {
   type JudgeVerdict,
   type FamilyFrontier,
   type PassKRow,
+  type TrialCoverage,
+  type TrialShortfall,
 } from "./harness.js";
 
 export { canonicalize, contentHash } from "./canonical.js";

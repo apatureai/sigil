@@ -8,8 +8,8 @@ import { runAudit, StubGateway, type AuditInput, type Judge, type GroundTruth } 
  * exercise Pass^k). The judge is well-calibrated against the ground truth.
  */
 const gateway = new StubGateway({
-  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["good"], t2: ["good"] } },
-  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good"], t2: ["good"] } },
+  premium: { costUsd: 0.02, latencyMs: 900, outputs: { t1: ["good", "good", "good", "good"], t2: ["good", "good", "good", "good"] } },
+  budget: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good", "good", "good", "good"], t2: ["good", "good", "good", "good"] } },
   flaky: { costUsd: 0.004, latencyMs: 500, outputs: { t1: ["good", "bad", "good", "bad"], t2: ["good", "good", "bad", "bad"] } },
 });
 
