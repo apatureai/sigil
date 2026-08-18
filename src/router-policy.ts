@@ -19,7 +19,12 @@ export interface RoutePolicyEntry {
   primary: string;
   /** Ordered fallbacks: the rest of the frontier, by ascending cost. */
   fallbacks: string[];
-  /** Present when evidence altered or annotated this route's ordering. */
+  /**
+   * Present when something about this route needs saying: the primary does not
+   * clear the quality floor (kept rather than dropped), or paired evidence
+   * reordered it quality-first. Absent means the primary met the floor on the
+   * default cost-first ordering.
+   */
   note?: string;
 }
 
@@ -66,13 +71,30 @@ export function exportRouterPolicy(
           : a.costPerRunUsd - b.costPerRunUsd || a.id.localeCompare(b.id),
       );
     // If nothing clears the floor, fall back to the highest-quality candidate so
-    // the policy never silently drops a family.
-    const ordered = eligible.length > 0 ? eligible : [...f.candidates].sort((a, b) => b.quality - a.quality || a.id.localeCompare(b.id)).slice(0, 1);
+    // the policy never silently drops a family. That fallback MUST be annotated:
+    // an entry reading `{qualityFloor: 0.95, primary: "frontier"}` otherwise
+    // asserts that frontier met 0.95, which is the opposite of what happened.
+    const belowFloor = eligible.length === 0;
+    const ordered = belowFloor
+      ? [...f.candidates].sort((a, b) => b.quality - a.quality || a.id.localeCompare(b.id)).slice(0, 1)
+      : eligible;
     const [primary, ...fallbacks] = ordered.map((c) => c.id);
     const entry: RoutePolicyEntry = { family: f.family, primary: primary ?? "", fallbacks };
-    return qualityFirst
-      ? { ...entry, note: "quality-first: paired evidence found the cost-first switch not defensible (see report switchEvidence)" }
-      : entry;
+
+    const notes: string[] = [];
+    if (belowFloor) {
+      const best = ordered[0];
+      notes.push(
+        `below quality floor: no candidate reached the floor of ${qualityFloor}; primary is the ` +
+          `highest-quality candidate measured` +
+          `${best === undefined ? "" : ` (${best.id} at ${best.quality})`} and does NOT clear it. ` +
+          "The family is kept rather than dropped; the route is not evidence that the floor was met.",
+      );
+    }
+    if (qualityFirst) {
+      notes.push("quality-first: paired evidence found the cost-first switch not defensible (see report switchEvidence)");
+    }
+    return notes.length > 0 ? { ...entry, note: notes.join(" | ") } : entry;
   });
   return { policyVersion: "neutral-route/1", qualityFloor, routes };
 }

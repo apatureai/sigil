@@ -70,6 +70,43 @@ describe("neutral router policy", () => {
     const policy = exportRouterPolicy(report, 1.01); // impossible floor
     expect(policy.routes.every((r) => r.primary.length > 0)).toBe(true);
   });
+
+  /**
+   * `{qualityFloor: 1.01, primary: "premium"}` with nothing else on the entry
+   * asserts that premium met a floor of 1.01. It did not; nothing met it, and
+   * the primary is a fallback so the family is not dropped. Keeping the family
+   * is right; saying nothing about it is not, so the entry names the miss.
+   */
+  it("says so on the entry when the primary does not clear the floor", async () => {
+    const report = await runAudit(input);
+    const route = exportRouterPolicy(report, 1.01).routes.find((r) => r.family === "support");
+
+    expect(route?.note).toContain("below quality floor");
+    expect(route?.note).toContain("does NOT clear it");
+    expect(route?.note).toContain("1.01");
+    // And the annotation is absent when the primary genuinely met the floor.
+    expect(exportRouterPolicy(report, 0.9).routes.find((r) => r.family === "support")?.note).toBeUndefined();
+  });
+
+  it("keeps both annotations when the floor is missed and evidence reordered the route", async () => {
+    const report = await runAudit(input);
+    const policy = exportRouterPolicy(report, 1.01, {
+      switchEvidence: {
+        support: {
+          defensible: false,
+          mcnemar: { pValue: 0.01, discordant: 8, currentOnly: 8, candidateOnly: 0 },
+          alpha: 0.05,
+          pairs: 8,
+          currentPassRate: 1,
+          candidatePassRate: 0.5,
+          statement: "candidate significantly worse",
+        },
+      },
+    });
+    const note = policy.routes.find((r) => r.family === "support")?.note;
+    expect(note).toContain("below quality floor");
+    expect(note).toContain("quality-first");
+  });
 });
 
 describe("governance overlay", () => {

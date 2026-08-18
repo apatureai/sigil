@@ -541,7 +541,9 @@ sibling implementation; see [Status and roadmap](#status-and-roadmap).
 - Incomplete labels: calibration runs over the labeled subset only, and the report discloses the
   sample size.
 - Nothing clears the quality floor: the router policy falls back to the highest-quality candidate,
-  never silently dropping a family, and the report flags it.
+  never silently dropping a family, and that route carries a `note` saying the primary does not
+  clear the floor. Without it, a policy entry pairing a `qualityFloor` with a `primary` reads as the
+  claim that the primary met it.
 - Judge poorly calibrated (high ECE): surfaced before any savings claim, never hidden.
 - No abstention threshold certifies the target risk: the certificate says so explicitly ("abstain
   or collect more labels"). A wide bound from a small sample is a finding, never rounded away.
