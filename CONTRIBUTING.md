@@ -23,14 +23,14 @@ pnpm install --frozen-lockfile
 
 ```sh
 pnpm typecheck   # tsc --noEmit
-pnpm test        # vitest run  -> 20 test files, 160 tests
+pnpm test        # vitest run  -> 22 test files, 187 tests
 pnpm lint        # eslint .
 pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
 Those four are the whole gate, and exactly what `.github/workflows/ci.yml` runs after the install,
-in that order. All of them pass on a clean checkout (verified 2026-08-09 on Node 24.14.0 with pnpm
-10.34.3: 20 test files, 160 tests, 2.69s).
+in that order. All of them pass on a clean checkout (verified 2026-08-18 on Node 24.14.0 with pnpm
+10.34.3: 22 test files, 187 tests, 3.36s).
 
 A single test file:
 
@@ -47,8 +47,9 @@ node dist/bin.js examples/credit-memo out/
 
 `pnpm build` is not part of the day-to-day source loop: `tsconfig.json` sets `noEmit: true`, so
 `pnpm typecheck` is the real compile gate. The build exists so `src/bin.ts`, the CLI entry point,
-can actually be run. There is no `bin` field in `package.json`, so there is no installable command
-yet; see the roadmap.
+can actually be run. `package.json` does declare a `bin` (`sigil` -> `./dist/bin.js`), so a local
+install of the packed tarball gets that command, but the package is not on npm, so nothing installs
+it from a registry today; see the roadmap.
 
 ## Conventions that matter
 

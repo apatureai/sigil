@@ -99,8 +99,8 @@ signature failure, unknown key id). Ed25519 is used because RFC 8032 signatures 
 keeping bundles byte-stable. Signer and verifier are injected ports; the repo ships no key.
 
 **9. Ports all the way down.** `Gateway`, `Judge`, `GroundTruth`, `BundleSigner`/`BundleVerifier`,
-`fetchImpl`, and the clock are all injected. That is why the whole test suite runs in under three
-seconds with no model, key, or network, and why the property tests (`fast-check`) can hammer the
+`fetchImpl`, and the clock are all injected. That is why the whole test suite runs in a few seconds
+with no model, key, or network, and why the property tests (`fast-check`) can hammer the
 certificate math directly.
 
 ## Requirements
@@ -651,14 +651,14 @@ These are properties of the statistics, not bugs, and each is stated in the outp
 ```
 pnpm install --frozen-lockfile
 pnpm typecheck   # tsc --noEmit
-pnpm test        # vitest run  -> Test Files 20 passed (20), Tests 160 passed (160)
+pnpm test        # vitest run  -> Test Files 22 passed (22), Tests 187 passed (187)
 pnpm lint        # eslint .
 pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
 Those five commands, in that order, are exactly what CI runs (`.github/workflows/ci.yml`). All five
-pass on a clean checkout, verified 2026-08-09 on Node 24.14.0 with pnpm 10.34.3: 20 test files, 160
-tests, 2.69s.
+pass on a clean checkout, verified 2026-08-18 on Node 24.14.0 with pnpm 10.34.3: 22 test files, 187
+tests, 3.36s.
 
 Run a single test file:
 
