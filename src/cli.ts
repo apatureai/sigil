@@ -83,6 +83,24 @@ export async function runBundleAudit(bundle: AuditBundle): Promise<AuditArtifact
     );
   }
 
+  // Same posture for the reliability question. `passK` above the recorded run
+  // count does not make Pass^k smaller, it makes it uncomputable, and the pairs
+  // then drop out of the table with no row and no reason. On the shipped
+  // example at `passK: 8` that emptied the reliability section entirely: the
+  // budget model's Pass^3 of 0.25 simply vanished, at exit 0, from a document
+  // that was content-addressed and signable.
+  if (report.passKCoverage.unmeasured.length > 0) {
+    const gaps = report.passKCoverage.unmeasured;
+    const detail = gaps.map((g) => `${g.model}/${g.taskId} has ${g.trials}`).join(", ");
+    throw new Error(
+      `bundle asks for Pass^${report.passKCoverage.k} but the captured panel holds fewer recorded runs for ` +
+        `${gaps.length} (model, task) pair${gaps.length === 1 ? "" : "s"}: ${detail}. ` +
+        "Pass^k over fewer than k runs is not a lower number, it is no measurement at all, and those pairs " +
+        "would leave the reliability table with no row and no reason. " +
+        `Set passK to at most ${Math.min(...gaps.map((g) => g.trials))} or capture the missing runs.`,
+    );
+  }
+
   const doc = buildReportDocument(report, {
     client: bundle.config.client,
     corpusHash: corpus.contentHash,

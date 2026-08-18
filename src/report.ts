@@ -93,6 +93,19 @@ export interface AuditReportDocument {
     shortfalls: Array<{ model: string; taskId: string; requested: number; recorded: number; replayed: number }>;
     statement: string;
   };
+  /**
+   * Present ONLY when some (model, task) held fewer than k recorded trials, so
+   * Pass^k could not be computed for it. Its absence is the claim that
+   * `reliabilityExposure` covers every pair the audit ran, which is what makes
+   * an empty or short table readable at all. A fully measured audit's document
+   * (and its hash) is unchanged.
+   */
+  passKCoverage?: {
+    k: number;
+    measured: number;
+    unmeasured: Array<{ model: string; taskId: string; trials: number }>;
+    statement: string;
+  };
   documentHash: string;
 }
 
@@ -148,6 +161,28 @@ export function buildReportDocument(
         `${coverage.realTrials === 1 ? "" : "s"} only; ${coverage.replayedTrials} repeated response` +
         `${coverage.replayedTrials === 1 ? " was" : "s were"} excluded rather than counted as evidence. ` +
         "Re-run the panel to obtain the missing trials before treating the requested count as achieved.",
+    };
+  }
+
+  // Same rule for the reliability table: carried only when some pair could not
+  // be measured, so a fully measured audit's document is byte-identical to what
+  // it was before this block existed. An empty or short `reliabilityExposure`
+  // with no block here means every pair the audit ran was measured and came
+  // back clean; with this block, it does not.
+  const passKCoverage = report.passKCoverage;
+  if (passKCoverage !== undefined && passKCoverage.unmeasured.length > 0) {
+    const pairs = passKCoverage.unmeasured.length;
+    const fewest = Math.min(...passKCoverage.unmeasured.map((g) => g.trials));
+    body.passKCoverage = {
+      k: passKCoverage.k,
+      measured: passKCoverage.measured,
+      unmeasured: passKCoverage.unmeasured.map((g) => ({ model: g.model, taskId: g.taskId, trials: g.trials })),
+      statement:
+        `Pass^${passKCoverage.k} asks whether ${passKCoverage.k} runs would all pass, so it needs at least ` +
+        `${passKCoverage.k} recorded runs; ${pairs} (model, task) pair${pairs === 1 ? " holds" : "s hold"} fewer ` +
+        `(as few as ${fewest}). Those pairs are NOT measured and contribute nothing to the reliability table ` +
+        `above, which covers ${passKCoverage.measured} pair${passKCoverage.measured === 1 ? "" : "s"}. ` +
+        `Their absence is missing evidence, not a passing result. Lower k to at most ${fewest} or capture more runs.`,
     };
   }
 
@@ -226,6 +261,14 @@ export function renderMarkdown(doc: AuditReportDocument): string {
   lines.push(`## Run-to-run reliability exposure (Pass^k)`);
   for (const r of doc.reliabilityExposure) {
     lines.push(`- ${r.model}: worst-case Pass^k = ${r.minPassHatK}${r.minPassHatK < 1 ? " (inconsistent across runs)" : ""}`);
+  }
+  // Without this, a table shortened (or emptied) by unmeasurable pairs reads as
+  // a clean result: no model listed, nothing flagged, nothing said.
+  if (doc.passKCoverage !== undefined) {
+    lines.push(`- NOT MEASURED: ${doc.passKCoverage.statement}`);
+    for (const g of doc.passKCoverage.unmeasured) {
+      lines.push(`- ${g.model} · ${g.taskId}: ${g.trials} recorded run${g.trials === 1 ? "" : "s"}, fewer than k=${doc.passKCoverage.k}; Pass^k not computed`);
+    }
   }
   if (doc.abstention !== undefined) {
     lines.push("");

@@ -257,8 +257,9 @@ node dist/bin.js <bundle-dir> [out-dir]
 
 `out-dir` defaults to `<bundle-dir>/out`, which writes inside the bundle directory, so pass an
 explicit out-dir if you want the output somewhere else. Exit code `0` on success, `2` with a usage
-message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, or a
-bundle asking for more trials than it captured, in which case the CLI writes nothing at all).
+message when `<bundle-dir>` is omitted, `1` on any failure (including an egress violation, a bundle
+asking for more trials than it captured, or a `passK` larger than the recorded runs, in which case
+the CLI writes nothing at all).
 
 The package is not on npm yet, so there is no globally installable `sigil` command; invoke the
 built entry point directly, as above. The usage line it prints on exit `2` reads
@@ -287,7 +288,7 @@ Sigil reads **no environment variables**. All configuration is the `config.json`
 | `client` | yes | Name printed in the report header |
 | `models` | yes | The candidate panel; must match the keys in `panel.json` |
 | `trialsPerTask` | yes | How many recorded trials per task to consume. It may not exceed the shortest series in `panel.json`; the CLI refuses the bundle rather than repeat a recorded output (see [Asking for more trials than were captured](#asking-for-more-trials-than-were-captured)) |
-| `passK` | yes | The `k` in Pass^k. The reliability question is "would `k` independent runs all pass?" |
+| `passK` | yes | The `k` in Pass^k. The reliability question is "would `k` independent runs all pass?" It may not exceed `trialsPerTask`, because the estimator needs at least `k` observed runs; the CLI refuses the bundle rather than leave the pairs unmeasured (see [Asking for a Pass^k the capture cannot answer](#asking-for-a-passk-the-capture-cannot-answer)) |
 | `currentModel` | yes | The incumbent the switch recommendation is measured against |
 | `qualityFloor` | yes | Minimum measured quality a model must clear to be the primary route in the exported policy |
 | `generatedAt` | yes | ISO timestamp recorded in the report. Supplied rather than read from the clock, so runs stay byte-identical |
@@ -328,6 +329,38 @@ as consistency across runs. Both halves of the path now refuse it:
 
 A custom `Gateway` should set `replayed: true` on any response that is not a distinct observation.
 Omitting the field asserts that it is one.
+
+### Asking for a Pass^k the capture cannot answer
+
+The companion mistake. `passK` is the `k` in "would `k` independent runs all pass?", and the
+unbiased estimator needs at least `k` observed runs, so a `(model, task)` holding fewer cannot be
+estimated at all. It used to be skipped in silence: no row, no note. On the shipped
+`examples/credit-memo` bundle, raising `passK` from 4 to 8 left the entire
+`## Run-to-run reliability exposure (Pass^k)` section empty, at exit 0, on a content-addressed
+document. The budget model's worst-case Pass^3 of 0.25, the one number in that report that rejects a
+10x-cheaper model, simply disappeared, and a heading with no rows under it reads as "nothing to
+flag".
+
+Missing evidence is not a passing result, so both halves refuse it the same way they refuse a
+replayed trial:
+
+- **The CLI refuses the bundle**, naming each short pair and the `passK` that fits the capture,
+  exits `1`, and writes nothing.
+
+  ```
+  $ node dist/bin.js ./bundle-asking-for-passk-8
+  audit refused: bundle asks for Pass^8 but the captured panel holds fewer recorded runs for 3
+  (model, task) pairs: budget/memo-1 has 4, frontier/memo-1 has 4, thrifty/memo-1 has 4. Pass^k
+  over fewer than k runs is not a lower number, it is no measurement at all, and those pairs would
+  leave the reliability table with no row and no reason. Set passK to at most 4 or capture the
+  missing runs.
+  ```
+
+- **The library records what it could not measure.** `report.passKCoverage` gives `k`, the number of
+  pairs `measured`, and every `unmeasured` pair with its recorded run count.
+  `buildReportDocument` carries that into the document as `passKCoverage` **only when some pair was
+  unmeasured**, and `renderMarkdown` prints `NOT MEASURED` plus a line per pair under the
+  reliability heading. A fully measured audit's document, and therefore its hash, is unchanged.
 
 ### As a library
 
@@ -515,6 +548,10 @@ sibling implementation; see [Status and roadmap](#status-and-roadmap).
 - Fewer recorded trials than `trialsPerTask` asks for: the CLI refuses the bundle and writes
   nothing; through the library, replayed responses are excluded from the sample and from Pass^k and
   the shortfall is stated in the report. The sample count is never padded to the requested number.
+- Fewer recorded runs than `passK` asks for: Pass^k is not computable for those pairs, so the CLI
+  refuses the bundle and writes nothing; through the library the pairs are listed in
+  `report.passKCoverage.unmeasured` and printed under `NOT MEASURED` in the report. A pair missing
+  from the reliability table is never left to read as a clean one.
 
 ## Status and roadmap
 

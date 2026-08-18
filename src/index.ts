@@ -43,6 +43,8 @@ export {
   type JudgeVerdict,
   type FamilyFrontier,
   type PassKRow,
+  type PassKCoverage,
+  type PassKGap,
   type TrialCoverage,
   type TrialShortfall,
 } from "./harness.js";

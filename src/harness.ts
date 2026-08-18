@@ -98,12 +98,42 @@ export interface TrialCoverage {
   shortfalls: TrialShortfall[];
 }
 
+/** One (model, task) whose recorded trials cannot answer the Pass^k question. */
+export interface PassKGap {
+  model: string;
+  taskId: string;
+  /** The k the audit asked for. */
+  k: number;
+  /** Distinct recorded trials judged for this pair; fewer than `k`. */
+  trials: number;
+}
+
+/**
+ * Which (model, task) pairs the Pass^k question was actually answered for.
+ *
+ * The unbiased estimator needs at least k observed runs, so a pair holding
+ * fewer is skipped rather than estimated. Skipping SILENTLY is the failure this
+ * records: with `passK` above every pair's trial count, `passK` comes back
+ * empty and the report's reliability section renders as a heading with no rows,
+ * which reads as "nothing to flag" when the truth is "nothing was measured".
+ */
+export interface PassKCoverage {
+  /** The k the audit asked for. */
+  k: number;
+  /** (model, task) pairs Pass^k was computed over. */
+  measured: number;
+  /** Pairs holding fewer than k recorded trials, sorted by model then task. */
+  unmeasured: PassKGap[];
+}
+
 export interface AuditReport {
   judgeReliability: JudgeReliability;
   families: FamilyFrontier[];
   passK: PassKRow[];
   /** What the numbers above are actually made of. Never omitted. */
   trialCoverage: TrialCoverage;
+  /** Which pairs the `passK` rows cover, and which they do not. Never omitted. */
+  passKCoverage: PassKCoverage;
 }
 
 interface ModelTaskStats {
@@ -123,6 +153,7 @@ export async function runAudit(input: AuditInput): Promise<AuditReport> {
   const tasksSorted = [...input.corpus.tasks].sort((a, b) => a.taskId.localeCompare(b.taskId));
   const modelsSorted = [...input.models].sort();
   const shortfalls: TrialShortfall[] = [];
+  const passKGaps: PassKGap[] = [];
   let realTrials = 0;
   let replayedTrials = 0;
 
@@ -167,8 +198,13 @@ export async function runAudit(input: AuditInput): Promise<AuditReport> {
       modelCost.set(model, [...(modelCost.get(model) ?? []), stats.costUsd]);
       modelLatency.set(model, [...(modelLatency.get(model) ?? []), stats.latencyMs]);
 
+      // Pass^k over fewer than k runs is not a smaller number, it is no number
+      // at all. The pair is recorded as unmeasured so its absence from the
+      // table below cannot be read as a clean result.
       if (input.passK <= stats.passes.length) {
         passKRows.push({ model, taskId: task.taskId, ...passAtK(stats.passes, input.passK) });
+      } else {
+        passKGaps.push({ model, taskId: task.taskId, k: input.passK, trials: stats.passes.length });
       }
     }
   }
@@ -201,6 +237,11 @@ export async function runAudit(input: AuditInput): Promise<AuditReport> {
       realTrials,
       replayedTrials,
       shortfalls: shortfalls.sort((a, b) => a.model.localeCompare(b.model) || a.taskId.localeCompare(b.taskId)),
+    },
+    passKCoverage: {
+      k: input.passK,
+      measured: passKRows.length,
+      unmeasured: passKGaps.sort((a, b) => a.model.localeCompare(b.model) || a.taskId.localeCompare(b.taskId)),
     },
   };
 }
