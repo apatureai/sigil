@@ -63,3 +63,48 @@ describe("assertSafeEgress", () => {
     expect(assertSafeEgress(safe)).toBe(safe);
   });
 });
+
+/**
+ * The guard searched only `JSON.stringify(artifact)` but compared it against the
+ * raw forbidden string. JSON escapes newlines, quotes, tabs, backslashes and
+ * control characters, so a needle containing any of them could never match the
+ * haystack: the guard passed exactly the outputs most worth blocking, since real
+ * model outputs are almost always multi-line or quoted. Every fixture in the
+ * suite above happened to be a single clean line, so nothing caught it.
+ */
+describe("assertSafeEgress across JSON-escaped characters", () => {
+  const cases: ReadonlyArray<readonly [string, string]> = [
+    ["newline", "Applicant 4821 SSN 123-45-6789.\nApproved with covenants."],
+    ["double quote", 'The memo says "approve" despite the covenant breach'],
+    ["backslash", "Approve per policy C:\\risk\\credit\\memo for applicant 4821"],
+    ["tab", "applicant\t4821\tapprove\tSSN 123-45-6789"],
+    ["carriage return", "Approve applicant 4821.\r\nSSN 123-45-6789 on file."],
+  ];
+
+  for (const [label, raw] of cases) {
+    it(`fails closed on a leaked output containing a ${label}`, () => {
+      expect(() => assertSafeEgress({ note: raw }, [raw])).toThrow(EgressViolation);
+      expect(checkEgress({ note: raw }, [raw])?.code).toBe("forbidden_content");
+      // Nested in an array, and as an object key, are the same leak.
+      expect(checkEgress({ findings: [{ detail: raw }] }, [raw])?.code).toBe("forbidden_content");
+      expect(checkEgress({ [raw]: 1 }, [raw])?.code).toBe("forbidden_content");
+    });
+  }
+
+  it("catches a credential split across an escaped character", () => {
+    expect(checkEgress({ auth: "Bearer\nabcdefghijklmnopqrstuvwx" })?.code).toBe("credential_pattern");
+  });
+
+  it("still catches forbidden content that leaked as a non-string value", () => {
+    // The raw-string walk alone cannot see this: the account number is a JSON
+    // number, so it lives in no string leaf. Scanning the serialization too is
+    // why the walk is an addition to that scan and not a replacement for it.
+    expect(checkEgress({ accountNumber: 4821123456789 }, ["4821123456789"])?.code).toBe("forbidden_content");
+    expect(checkEgress({ ids: [1, 4821123456789] }, ["4821123456789"])?.code).toBe("forbidden_content");
+  });
+
+  it("still releases an artifact that merely resembles the forbidden text", () => {
+    const raw = "Applicant 4821 SSN 123-45-6789.\nApproved with covenants.";
+    expect(() => assertSafeEgress({ note: "Applicant count: 1. Approved." }, [raw])).not.toThrow();
+  });
+});

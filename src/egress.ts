@@ -30,22 +30,56 @@ const CREDENTIAL_PATTERNS: ReadonlyArray<RegExp> = [
 const MIN_FORBIDDEN_LEN = 3;
 
 /**
+ * Every string the artifact actually holds: object keys, string values, and the
+ * strings inside arrays, in their UNESCAPED form.
+ *
+ * Searching only the JSON serialization is what a fail-open looks like here. A
+ * model output holding a newline serializes as the two characters `\` and `n`,
+ * so `serialized.includes(rawOutput)` is false for the very outputs most worth
+ * blocking: anything multi-line, anything with a quote, tab, backslash, or
+ * control character. Real model outputs are almost always one of those. The
+ * serialization is still scanned as well, since it can only add detections.
+ */
+function collectStrings(value: unknown, out: string[]): void {
+  if (typeof value === "string") {
+    out.push(value);
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const v of value) collectStrings(v, out);
+    return;
+  }
+  if (value !== null && typeof value === "object") {
+    for (const [key, v] of Object.entries(value as Record<string, unknown>)) {
+      out.push(key);
+      collectStrings(v, out);
+    }
+  }
+}
+
+/**
  * Assert an artifact is safe to release. `forbidden` is the set of raw outputs /
  * prompts that must never appear in an exported artifact. Throws `EgressViolation`
  * (fail-closed) if any forbidden content or credential pattern is present;
  * otherwise returns the artifact unchanged.
  */
 export function assertSafeEgress<T>(artifact: T, forbidden: readonly string[] = []): T {
-  const serialized = JSON.stringify(artifact) ?? "";
+  const strings: string[] = [];
+  collectStrings(artifact, strings);
+  // The escaped serialization plus every raw string the artifact holds, so a
+  // needle containing an escapable character is matched against the same bytes
+  // it was written with.
+  const haystacks = [JSON.stringify(artifact) ?? "", ...strings];
 
   for (const secret of forbidden) {
-    if (secret.length >= MIN_FORBIDDEN_LEN && serialized.includes(secret)) {
+    if (secret.length < MIN_FORBIDDEN_LEN) continue;
+    if (haystacks.some((h) => h.includes(secret))) {
       throw new EgressViolation("forbidden_content", "egress artifact contains a raw output/prompt that must not leave the client environment");
     }
   }
 
   for (const pattern of CREDENTIAL_PATTERNS) {
-    if (pattern.test(serialized)) {
+    if (haystacks.some((h) => pattern.test(h))) {
       throw new EgressViolation("credential_pattern", "egress artifact contains a credential-shaped string");
     }
   }

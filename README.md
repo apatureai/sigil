@@ -85,10 +85,12 @@ the analysis path; the only injected non-determinism is the report timestamp, wh
 rather than read from a clock. The same frozen corpus plus the same frozen panel produces a
 byte-identical report, which is what makes third-party reproduction possible at all.
 
-**7. Fail-closed data egress.** `egress.ts` refuses to release any artifact whose serialization
-contains a raw model output, a raw prompt, or a credential-shaped string. The end-to-end golden
-test deliberately plants a PII-leaking model output in the corpus and asserts it cannot reach the
-exported deliverable.
+**7. Fail-closed data egress.** `egress.ts` refuses to release any artifact containing a raw model
+output, a raw prompt, or a credential-shaped string. It searches both the artifact's own strings
+(keys, values, array elements) and its JSON serialization, because matching only the serialization
+misses every needle holding a character JSON escapes, which is to say every multi-line or quoted
+model output. The end-to-end golden test deliberately plants a PII-leaking model output in the
+corpus and asserts it cannot reach the exported deliverable.
 
 **8. Signed, offline-verifiable artifacts.** `bundle.ts` produces a detached Ed25519 signature over
 the canonical `{documentHash, markdownHash}` payload. Verification re-derives everything with no
