@@ -95,7 +95,7 @@ function eProcessStatement(s: Omit<EProcessState, "statement">): string {
   return (
     `E-process vs H0 "true rate ≤ ${(s.mu0 * 100).toFixed(2)}%": e-value ${s.eValue.toFixed(4)} ` +
     `against threshold ${s.threshold.toFixed(2)} after ${s.observations} observations` +
-    (s.alarmed ? ` — ALARMED at observation ${s.alarmedAt}` : "") +
+    (s.alarmed ? `; ALARMED at observation ${s.alarmedAt}` : "") +
     `. Guarantee (Ville): if H0 holds, the probability this monitor EVER alarms is ≤ ${s.alpha}.`
   );
 }
@@ -159,7 +159,7 @@ function eDetectorStatement(s: Omit<EDetectorState, "statement">): string {
   return (
     `E-detector (changepoint) vs pre-change rate ≤ ${(s.mu0 * 100).toFixed(2)}%: statistic ${s.stat.toFixed(4)} ` +
     `against threshold ${s.threshold.toFixed(2)} after ${s.observations} observations` +
-    (s.alarmed ? ` — ALARMED at observation ${s.alarmedAt}` : "") +
+    (s.alarmed ? `; ALARMED at observation ${s.alarmedAt}` : "") +
     `. Guarantee: with no change, the expected time to a false alarm is ≥ ${s.threshold.toFixed(0)} observations (ARL ≥ 1/α).`
   );
 }

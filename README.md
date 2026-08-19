@@ -178,7 +178,7 @@ $ node dist/bin.js examples/credit-memo out/
 wrote report.{json,md}, router-policy.json, governance.json to out/
 
 $ cat out/report.md
-# Independent AI Quality & Efficiency Assurance — Example Bank
+# Independent AI Quality & Efficiency Assurance: Example Bank
 
 - Corpus: `sha256:d0483ca33ca972f0651497eaa07e4c8d21abdc3c9743f9b92e9637ce39a974e1`
 - Panel: frontier, budget, thrifty
@@ -188,7 +188,7 @@ $ cat out/report.md
 ## Judge reliability (the number's own error bars)
 - ECE: 0.1 · Brier: 0.01 · sample: 12
 
-## Efficiency frontier — equal-quality savings
+## Efficiency frontier (equal-quality savings)
 - **credit_memo**: switch frontier → thrifty, save 96.7% at equal-or-better measured quality
 
 ## Run-to-run reliability exposure (Pass^k)

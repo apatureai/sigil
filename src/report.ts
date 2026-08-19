@@ -232,7 +232,7 @@ export function buildReportDocument(
 /** Deterministic markdown render of the report document. */
 export function renderMarkdown(doc: AuditReportDocument): string {
   const lines: string[] = [];
-  lines.push(`# Independent AI Quality & Efficiency Assurance — ${doc.meta.client}`);
+  lines.push(`# Independent AI Quality & Efficiency Assurance: ${doc.meta.client}`);
   lines.push("");
   lines.push(`- Corpus: \`${doc.meta.corpusHash}\``);
   lines.push(`- Panel: ${doc.meta.panel.join(", ")}`);
@@ -249,7 +249,7 @@ export function renderMarkdown(doc: AuditReportDocument): string {
     );
   }
   lines.push("");
-  lines.push(`## Efficiency frontier — equal-quality savings`);
+  lines.push(`## Efficiency frontier (equal-quality savings)`);
   for (const f of doc.findings) {
     if (f.recommendedFromTo) {
       lines.push(`- **${f.family}**: switch ${f.recommendedFromTo.from} → ${f.recommendedFromTo.to}, save ${(f.savingsPct * 100).toFixed(1)}% at ${f.qualityHeld ? "equal-or-better" : "LOWER"} measured quality`);

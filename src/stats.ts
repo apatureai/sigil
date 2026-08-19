@@ -109,8 +109,8 @@ export function verifySwitchQuality(
   const statement = significantlyWorse
     ? `Candidate is significantly worse on paired tasks (McNemar exact p=${mcnemar.pValue.toFixed(4)}, ` +
       `${currentOnly} vs ${candidateOnly} discordant); the equal-quality switch claim is NOT defensible on this sample.`
-    : `Paired comparison over ${n} tasks: candidate pass ${(candidatePassRate * 100).toFixed(1)}% vs incumbent ${(currentPassRate * 100).toFixed(1)}%; ` +
-      `McNemar exact p=${mcnemar.pValue.toFixed(4)} over ${mcnemar.discordant} discordant pairs — no significant quality loss detected at α=${alpha}. ` +
+    : `Paired comparison over ${n} tasks: candidate pass ${(candidatePassRate * 100).toFixed(1)}% vs incumbent ${(currentPassRate * 100).toFixed(1)}%. ` +
+      `McNemar exact p=${mcnemar.pValue.toFixed(4)} over ${mcnemar.discordant} discordant pairs: no significant quality loss detected at α=${alpha}. ` +
       `Absence of detected loss is not proof of equality; the disclosure ships with the sample size.`;
 
   return {

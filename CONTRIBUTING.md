@@ -64,7 +64,12 @@ it from a registry today; see the roadmap.
   behaviour usually belongs in the module that owns that stage, with a matching `test/<module>.test.ts`.
 - **Public surface goes through `src/index.ts`.** If it is meant to be used from outside, export it
   there.
-- **No em dashes in prose**, in docs or in code comments.
+- **No em dashes in prose or in program output**: docs, code comments, and every string the code
+  emits (report headings, statements, CLI text). Use a colon, a comma, a full stop, or rewrite the
+  clause. `test/no-em-dash.test.ts` enforces this from both directions: it renders a fully
+  populated report and checks the shipped strings, and it scans the checked-in files. This is not
+  only a style rule. `report.ts` writes the content-addressed document whose hash the README pins
+  as reproducible, so punctuation that reaches the report body moves that hash.
 
 ## The one rule that matters if you touch the code
 
