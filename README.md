@@ -157,7 +157,7 @@ Done in 804ms using pnpm v10.34.3
 
 $ pnpm build
 
-> @apatureai/sigil@0.1.0 build /path/to/sigil
+> @apatureai/sigil@0.1.1 build /path/to/sigil
 > tsc -p tsconfig.build.json
 
 ```

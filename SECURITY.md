@@ -5,7 +5,7 @@
 | Version | Supported |
 |---|---|
 | `main` | Yes. Fixes land on `main` |
-| Tagged releases | `v0.1.0` is the current release. Not yet published to npm. Track `main` |
+| Tagged releases | `v0.1.1` is the current release, published to npm as `@apatureai/sigil`. Track `main` |
 
 Sigil has **zero runtime dependencies**: every import outside the repo is a Node built-in
 (`node:crypto`, `node:fs`, `node:path`). The supply-chain surface is the dev toolchain only
