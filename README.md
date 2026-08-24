@@ -2,6 +2,8 @@
 
 [![CI](https://img.shields.io/github/actions/workflow/status/apatureai/sigil/ci.yml?branch=main&label=CI)](https://github.com/apatureai/sigil/actions/workflows/ci.yml) [![license](https://img.shields.io/github/license/apatureai/sigil?color=blue)](https://github.com/apatureai/sigil/blob/main/LICENSE) [![node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](#requirements)
 
+> Part of the [Apature stack](https://github.com/apatureai) — automated design review for rendered UI. The [org profile](https://github.com/apatureai/.github/blob/main/profile/README.md) maps how the pieces compose.
+
 **Error bars for LLM-as-judge evals: calibration, finite-sample risk certificates, and anytime-valid drift monitoring, in dependency-free TypeScript.**
 
 If you use a model to grade another model's output, you have a ruler you have never measured.
