@@ -1,0 +1,44 @@
+name: release
+
+# Publishes @apatureai/sigil to npm when a version tag (e.g. v0.1.0) is pushed.
+#
+# One-time maintainer setup (required before the first tag, or publish fails):
+#   1. Create an npm automation token with publish rights on the @apatureai
+#      scope: https://www.npmjs.com/settings/apatureai/tokens (Automation type).
+#   2. Add it to the repo as a secret named NPM_TOKEN:
+#        gh secret set NPM_TOKEN --repo apatureai/sigil
+#      (or Settings -> Secrets and variables -> Actions -> New repository secret).
+#
+# The publish runs `prepublishOnly` (a fresh build) and emits npm provenance,
+# which requires the `id-token: write` permission granted below and a public
+# repository. Release notes and the GitHub Release are managed separately; this
+# workflow only puts the tarball on the registry.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with: { version: 9 }
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm lint
+      - run: pnpm publish --provenance --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

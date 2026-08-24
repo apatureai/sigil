@@ -619,8 +619,10 @@ rotate-with-overlap refresh policy, sitting on top of `drift.ts`. Nothing is imp
 **npm publication.** Nothing is on npm yet, so `npm i @apatureai/sigil` does not work today. The
 packaging is done and verified: the manifest is no longer `private`, it declares `bin`, `files`,
 `exports`, `engines` and a `prepublishOnly` build, and the packed tarball has been installed from
-disk and its `sigil` command run end to end against the shipped example bundle. What is left is the
-publish itself and a release workflow to automate it. The unscoped name `sigil` was taken (the
+disk and its `sigil` command run end to end against the shipped example bundle. A tag-triggered
+release workflow (`.github/workflows/release.yml`) now publishes with provenance on any `v*` tag;
+what is left is the maintainer adding the `NPM_TOKEN` secret (see `CONTRIBUTING.md`) and pushing the
+first tag. The unscoped name `sigil` was taken (the
 registry holds a tombstoned entry from a 2013 package unpublished in October 2024), so the package
 name is the scoped `@apatureai/sigil`.
 
@@ -651,14 +653,14 @@ These are properties of the statistics, not bugs, and each is stated in the outp
 ```
 pnpm install --frozen-lockfile
 pnpm typecheck   # tsc --noEmit
-pnpm test        # vitest run  -> Test Files 22 passed (22), Tests 187 passed (187)
+pnpm test        # vitest run  -> Test Files 23 passed (23), Tests 192 passed (192)
 pnpm lint        # eslint .
 pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
 Those five commands, in that order, are exactly what CI runs (`.github/workflows/ci.yml`). All five
-pass on a clean checkout, verified 2026-08-18 on Node 24.14.0 with pnpm 10.34.3: 22 test files, 187
-tests, 3.36s.
+pass on a clean checkout, verified 2026-08-24 on Node 24.14.0 with pnpm 10.34.3: 23 test files, 192
+tests, ~2s.
 
 Run a single test file:
 
