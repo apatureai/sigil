@@ -23,14 +23,14 @@ pnpm install --frozen-lockfile
 
 ```sh
 pnpm typecheck   # tsc --noEmit
-pnpm test        # vitest run  -> 22 test files, 187 tests
+pnpm test        # vitest run  -> 23 test files, 192 tests
 pnpm lint        # eslint .
 pnpm build       # tsc -p tsconfig.build.json -> dist/
 ```
 
 Those four are the whole gate, and exactly what `.github/workflows/ci.yml` runs after the install,
 in that order. All of them pass on a clean checkout (verified 2026-08-18 on Node 24.14.0 with pnpm
-10.34.3: 22 test files, 187 tests, 3.36s).
+10.34.3: 23 test files, 192 tests, ~2s).
 
 A single test file:
 
@@ -110,6 +110,34 @@ Sigil is **offline and deterministic by construction**, and the tests enforce it
 - Review is by the maintainer, usually as a round of comments rather than a silent merge or close.
   Expect questions about assumptions if you touch anything statistical.
 - No CLA. MIT in, MIT out.
+
+## Releasing (maintainer)
+
+Publishing is automated by `.github/workflows/release.yml`, which runs the gate
+and then `pnpm publish --provenance` whenever a `v*` tag is pushed. One-time
+setup is required before the first tag, or the publish step fails:
+
+1. Create an npm **automation** token with publish rights on the `@apatureai`
+   scope at https://www.npmjs.com/settings/apatureai/tokens.
+2. Add it as a repository secret named `NPM_TOKEN`:
+
+   ```sh
+   gh secret set NPM_TOKEN --repo apatureai/sigil
+   ```
+
+To cut a release:
+
+1. Bump `version` in `package.json`.
+2. Move the `Unreleased` items in `CHANGELOG.md` under a new dated version
+   heading and refresh the compare links at the bottom.
+3. Merge that to `main`, then tag and push:
+
+   ```sh
+   git tag v0.1.1 && git push origin v0.1.1
+   ```
+
+4. The workflow publishes the tarball with provenance. Author the GitHub Release
+   from the same tag with notes drawn from the changelog.
 
 ## Reporting bugs
 
