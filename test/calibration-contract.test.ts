@@ -6,7 +6,7 @@ import type { JudgePrediction } from "../src/metrics.js";
 
 /**
  * Calibration contract: the canonical ECE/Brier implementation lives upstream
- * in apatureai/verdict (`@engine/eval`); sigil MIRRORS it, with no
+ * in apatureai/verdict (`@apatureai/verdict-eval`); sigil MIRRORS it, with no
  * dependency in either direction, and this test pins the mirror to a frozen
  * golden fixture copied from that upstream generator. The vectors include
  * exact bin-edge confidences, the FP-sensitive inputs where a
@@ -38,7 +38,7 @@ const golden = JSON.parse(
   readFileSync(fileURLToPath(new URL("../fixtures/calibration-contract.golden.json", import.meta.url)), "utf8"),
 ) as { vectors: ContractVector[] };
 
-/** Byte-for-byte mirror of @engine/eval's `contractPairs` generator. */
+/** Byte-for-byte mirror of @apatureai/verdict-eval's `contractPairs` generator. */
 function contractPairs(seed: number, count: number): JudgePrediction[] {
   let s = seed >>> 0;
   const next = (): number => {
