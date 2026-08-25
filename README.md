@@ -13,7 +13,7 @@
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/github/license/apatureai/sigil"></a>
 </p>
 
-<p>Part of the <a href="https://github.com/apatureai">Apature stack</a> - automated design review for rendered UI. The <a href="https://github.com/apatureai/.github/blob/main/profile/README.md">org profile</a> maps how the pieces compose.</p>
+<p>Part of the <a href="https://github.com/apatureai">Apature stack</a> — automated design review for rendered UI. The <a href="https://github.com/apatureai/.github/blob/main/profile/README.md">org profile</a> maps how the pieces compose.</p>
 
 </div>
 
