@@ -19,6 +19,7 @@ a real gap today, described in enough detail to pick up.
 | Drift monitors (e-process, e-detector, CUSUM) | Implemented and unit-tested; external cross-validation is a roadmap item below |
 | Adaptive conformal intervals (`aci.ts`) | Abstains when the history is too short |
 | CLI over a captured bundle | `node dist/bin.js <bundle-dir> [out-dir]` |
+| npm publication | `@apatureai/sigil` is published with bin `sigil`; `npx @apatureai/sigil <bundle-dir>` reproduces the shipped example audit byte for byte. The unscoped name `sigil` is a tombstoned 2013 package, hence the scope. Releases publish with provenance from `.github/workflows/release.yml` on `v*` tags |
 
 ### Partial
 
@@ -58,16 +59,6 @@ is open.
 **Anchor-set drift attribution (system vs judge).** When drift fires, it does not tell you whether
 the system got worse or the judge did. The design sketch is a held-out anchor set with a
 rotate-with-overlap refresh policy, sitting on top of `drift.ts`. Nothing is implemented.
-
-**npm publication.** Nothing is on npm yet, so `npm i @apatureai/sigil` does not work today. The
-packaging is done and verified: the manifest is no longer `private`, it declares `bin`, `files`,
-`exports`, `engines` and a `prepublishOnly` build, and the packed tarball has been installed from
-disk and its `sigil` command run end to end against the shipped example bundle. A tag-triggered
-release workflow (`.github/workflows/release.yml`) now publishes with provenance on any `v*` tag;
-what is left is the maintainer adding the `NPM_TOKEN` secret (see `CONTRIBUTING.md`) and pushing the
-first tag. The unscoped name `sigil` was taken (the
-registry holds a tombstoned entry from a 2013 package unpublished in October 2024), so the package
-name is the scoped `@apatureai/sigil`.
 
 ### Out of scope on purpose
 

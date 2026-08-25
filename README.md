@@ -91,8 +91,10 @@ node dist/bin.js <bundle-dir> [out-dir]
 `out-dir` defaults to `<bundle-dir>/out`. Exit code `0` on success, `2` with a usage message when
 `<bundle-dir>` is omitted, `1` on any failure - including an egress violation, a bundle asking for
 more trials than it captured, or a `passK` larger than the recorded runs, in which case the CLI
-writes nothing at all (see [Failure modes](docs/failure-modes.md)). The package is not yet installable
-from npm; invoke the built entry point directly.
+writes nothing at all (see [Failure modes](docs/failure-modes.md)). The CLI is also published as
+[`@apatureai/sigil`](https://www.npmjs.com/package/@apatureai/sigil) (bin `sigil`), so
+`npx @apatureai/sigil <bundle-dir> [out-dir]` runs the same audit and reproduces the same document
+hash without a checkout.
 
 A bundle directory holds four required JSON files and one optional one. To audit your own system,
 copy `examples/credit-memo/` and replace the contents:
@@ -167,8 +169,8 @@ Everything the quickstart exercises works today: calibration metrics, risk certi
 (Clopper-Pearson, Learn-Then-Test, property-tested), Pass^k with a certified floor, the Pareto
 frontier and McNemar switch gate, the four written artifacts, the signed bundle, and the egress
 guard. The live OpenAI-compatible gateway adapter is implemented and unit-tested against an injected
-`fetch` but unverified against a real endpoint (Partial). Continuous/trend mode, external
-cross-validation of `drift.ts`, and npm publication are Planned. Full detail, described as real gaps,
+`fetch` but unverified against a real endpoint (Partial). Continuous/trend mode and external
+cross-validation of `drift.ts` are Planned. Full detail, described as real gaps,
 in [docs/roadmap.md](docs/roadmap.md).
 
 ## Prior work
