@@ -1,14 +1,62 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-label="sigil: error bars for LLM-as-judge evals">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300"
+     role="img" aria-label="sigil: error bars for LLM-as-judge evals">
   <!-- ground -->
-  <rect width="1200" height="260" fill="#FFFFFF"/>
-  <!-- wordmark -->
-  <text x="600" y="126" text-anchor="middle"
+  <rect width="1200" height="300" fill="#FFFFFF"/>
+
+  <!-- texture: fine dot grid, 24px pitch, 5% -->
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="12" cy="12" r="1.1" fill="#1B1F24"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="300" fill="url(#dots)" opacity="0.05" aria-hidden="true"/>
+
+  <!-- motif: a calibration curve with error-bar whiskers; the grey points drift off
+       the identity diagonal, the accent point sits on it and carries the widest
+       whisker — the uncertainty sigil actually quantifies -->
+  <g aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">
+
+    <!-- axes -->
+    <path d="M 112 62 V 232 H 348" fill="none" stroke="#C7CFD7" stroke-width="2"/>
+
+    <!-- identity / reference diagonal (perfect calibration) -->
+    <line x1="112" y1="232" x2="340" y2="72" stroke="#C7CFD7" stroke-width="1.5" stroke-dasharray="5 5"/>
+
+    <!-- grey calibration points, off-diagonal, with error-bar whiskers -->
+    <!-- (150, 212) whisker +/-14 -->
+    <line x1="150" y1="198" x2="150" y2="226" stroke="#57606A" stroke-width="2"/>
+    <line x1="147" y1="198" x2="153" y2="198" stroke="#57606A" stroke-width="2"/>
+    <line x1="147" y1="226" x2="153" y2="226" stroke="#57606A" stroke-width="2"/>
+    <circle cx="150" cy="212" r="4.5" fill="#FFFFFF" stroke="#57606A" stroke-width="2"/>
+    <!-- (192, 178) whisker +/-18 -->
+    <line x1="192" y1="160" x2="192" y2="196" stroke="#57606A" stroke-width="2"/>
+    <line x1="189" y1="160" x2="195" y2="160" stroke="#57606A" stroke-width="2"/>
+    <line x1="189" y1="196" x2="195" y2="196" stroke="#57606A" stroke-width="2"/>
+    <circle cx="192" cy="178" r="4.5" fill="#FFFFFF" stroke="#57606A" stroke-width="2"/>
+    <!-- (234, 160) whisker +/-12 -->
+    <line x1="234" y1="148" x2="234" y2="172" stroke="#57606A" stroke-width="2"/>
+    <line x1="231" y1="148" x2="237" y2="148" stroke="#57606A" stroke-width="2"/>
+    <line x1="231" y1="172" x2="237" y2="172" stroke="#57606A" stroke-width="2"/>
+    <circle cx="234" cy="160" r="4.5" fill="#FFFFFF" stroke="#57606A" stroke-width="2"/>
+    <!-- (318, 92) whisker +/-16 -->
+    <line x1="318" y1="76" x2="318" y2="108" stroke="#57606A" stroke-width="2"/>
+    <line x1="315" y1="76" x2="321" y2="76" stroke="#57606A" stroke-width="2"/>
+    <line x1="315" y1="108" x2="321" y2="108" stroke="#57606A" stroke-width="2"/>
+    <circle cx="318" cy="92" r="4.5" fill="#FFFFFF" stroke="#57606A" stroke-width="2"/>
+
+    <!-- emphasized point on the diagonal, accent, widest whisker -->
+    <line x1="276" y1="106" x2="276" y2="150" stroke="#7A4E78" stroke-width="2.5"/>
+    <line x1="272" y1="106" x2="280" y2="106" stroke="#7A4E78" stroke-width="2.5"/>
+    <line x1="272" y1="150" x2="280" y2="150" stroke="#7A4E78" stroke-width="2.5"/>
+    <circle cx="276" cy="128" r="6" fill="#7A4E78"/>
+  </g>
+
+  <!-- type -->
+  <text x="428" y="142"
         font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
-        font-size="68" font-weight="600" letter-spacing="-1" fill="#1B1F24">sigil</text>
-  <!-- accent rule: the single accent element -->
-  <rect x="564" y="152" width="72" height="3" rx="1.5" fill="#7A4E78"/>
-  <!-- tagline -->
-  <text x="600" y="198" text-anchor="middle"
+        font-size="76" font-weight="600" letter-spacing="-1.5" fill="#1B1F24">sigil</text>
+  <rect x="430" y="164" width="96" height="4" rx="2" fill="#7A4E78"/>
+  <text x="428" y="210"
         font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif"
-        font-size="21" font-weight="400" letter-spacing="0.2" fill="#57606A">error bars for LLM-as-judge evals</text>
+        font-size="22" font-weight="400" letter-spacing="0.2" fill="#57606A">error bars for LLM-as-judge evals</text>
 </svg>
