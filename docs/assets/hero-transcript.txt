@@ -1,0 +1,18 @@
+wrote report.{json,md}, router-policy.json, governance.json to out/
+# Independent AI Quality & Efficiency Assurance: Example Bank
+
+- Corpus: `sha256:d0483ca33ca972f0651497eaa07e4c8d21abdc3c9743f9b92e9637ce39a974e1`
+- Panel: frontier, budget, thrifty
+- Generated: 2026-06-30T00:00:00.000Z
+- Document hash: `sha256:91f91ffe93aca39e2b031feb3007e83104c08a8b78df8fdd77f63c068df8be42`
+
+## Judge reliability (the number's own error bars)
+- ECE: 0.1 · Brier: 0.01 · sample: 12
+
+## Efficiency frontier (equal-quality savings)
+- **credit_memo**: switch frontier → thrifty, save 96.7% at equal-or-better measured quality
+
+## Run-to-run reliability exposure (Pass^k)
+- budget: worst-case Pass^k = 0.25 (inconsistent across runs)
+- frontier: worst-case Pass^k = 1
+- thrifty: worst-case Pass^k = 1
